@@ -1274,13 +1274,13 @@ void Panel::PaintTraverse( bool repaint, bool allowForce )
 			for (int i=0; i < controlGroup->Size(); ++i)
 			{
 				// outline all selected panels 
-				//CUtlVector<PHandle> *controlGroup = _buildGroup->GetControlGroup();
-				//for (int j=0; j < controlGroup->Size(); ++j)
-				//{
+				CUtlVector<PHandle> *controlGroup = _buildGroup->GetControlGroup();
+				for (int i=0; i < controlGroup->Size(); ++i)
+				{
 					surface()->PushMakeCurrent( ((*controlGroup)[i].Get())->GetVPanel(), false );
 					((*controlGroup)[i].Get())->PaintBuildOverlay();
 					surface()->PopMakeCurrent( ((*controlGroup)[i].Get())->GetVPanel() );
-				//}	
+				}	
 			
 				_buildGroup->DrawRulers();						
 			}
@@ -2952,7 +2952,7 @@ void Panel::OnThink()
 			return;
 		}
 
-		if ( m_pDragDrop->m_hCurrentDrop != 0 )
+		if ( m_pDragDrop->m_hCurrentDrop )
 		{
 			if ( !input()->IsMouseDown( MOUSE_LEFT ) )
 			{
@@ -6971,7 +6971,7 @@ void Panel::OnFinishDragging( bool mousereleased, MouseCode code, bool abort /*=
 		Q_strncpy( cmd, "default", sizeof( cmd ) );
 
 		if ( mousereleased &&
-			m_pDragDrop->m_hCurrentDrop != 0 &&
+			m_pDragDrop->m_hCurrentDrop != false &&
 			m_pDragDrop->m_hDropContextMenu.Get() )
 		{
 			Menu *menu = m_pDragDrop->m_hDropContextMenu;
@@ -6983,8 +6983,8 @@ void Panel::OnFinishDragging( bool mousereleased, MouseCode code, bool abort /*=
 				if ( pHover )
 				{
 					// Figure out if it's a menu item...
-					int itemc = menu->GetItemCount();
-					for ( int i = 0; i < itemc; ++i )
+					int c = menu->GetItemCount();
+					for ( int i = 0; i < c; ++i )
 					{
 						int id = menu->GetMenuID( i );
 						MenuItem *item = menu->GetMenuItem( id );
@@ -7230,7 +7230,7 @@ void Panel::OnContinueDragging()
 		}
 	}
 
-	if ( m_pDragDrop->m_hCurrentDrop != 0 &&
+	if ( m_pDragDrop->m_hCurrentDrop &&
 		m_pDragDrop->m_hDropContextMenu.Get() )
 	{
 		Menu *menu = m_pDragDrop->m_hDropContextMenu;
@@ -7386,8 +7386,8 @@ VPANEL CDragDropHelperPanel::IsWithinTraverse(int x, int y, bool traversePopups)
 
 void CDragDropHelperPanel::PostChildPaint()
 {
-	int pc = m_PaintList.Count();
-	for ( int i = pc - 1; i >= 0 ; --i )
+	int c = m_PaintList.Count();
+	for ( int i = c - 1; i >= 0 ; --i )
 	{
 		DragHelperPanel_t& data = m_PaintList[ i ];
 
@@ -7408,12 +7408,13 @@ void CDragDropHelperPanel::PostChildPaint()
 			else
 			{
 				CUtlVector< Panel * > temp;
-				CUtlVector< PHandle >& data_ = panel->GetDragDropInfo()->m_DragPanels;
+				CUtlVector< PHandle >& data = panel->GetDragDropInfo()->m_DragPanels;
 				CUtlVector< KeyValues * >& msglist = panel->GetDragDropInfo()->m_DragData;
-				int di, dc = data_.Count();
-				for ( di = 0; di < dc ; ++di )
+				int i, c;
+				c = data.Count();
+				for ( i = 0; i < c ; ++i )
 				{
-					Panel *pPanel = data_[ di ].Get();
+					Panel *pPanel = data[ i ].Get();
 					if ( pPanel )
 					{
 						temp.AddToTail( pPanel );
@@ -7425,7 +7426,7 @@ void CDragDropHelperPanel::PostChildPaint()
 		}
 	}
 
-	if ( pc == 0 )
+	if ( c == 0 )
 	{
 		MarkForDeletion();
 	}
@@ -8665,7 +8666,7 @@ void VguiPanelGetSortedChildPanelList( Panel *pParentPanel, void *pSortedPanels 
 	}
 }
 
-void VguiPanelGetSortedChildButtonList( Panel *pParentPanel, void *pSortedPanels, char *pchFilter /*= NULL*/, int nFilterType /*= 0*/ )
+void VguiPanelGetSortedChildButtonList( Panel *pParentPanel, void *pSortedPanels, const char *pchFilter /*= NULL*/, int nFilterType /*= 0*/ )
 {
 	CUtlSortVector< SortedPanel_t, CSortedPanelYLess > *pList = reinterpret_cast< CUtlSortVector< SortedPanel_t, CSortedPanelYLess >* >( pSortedPanels );
 

@@ -446,6 +446,8 @@ float ChangeDistance( float flInterval, float flGoalDistance, float flGoalVeloci
 //
 //=============================================================================
 
+#define MAX_AIS	256 
+
 class CAI_Manager
 {
 public:
@@ -460,10 +462,6 @@ public:
 	bool FindAI( CAI_BaseNPC *pAI )	{ return ( m_AIs.Find( pAI ) != m_AIs.InvalidIndex() ); }
 	
 private:
-	enum
-	{
-		MAX_AIS = 256
-	};
 	
 	typedef CUtlVector<CAI_BaseNPC *> CAIArray;
 	

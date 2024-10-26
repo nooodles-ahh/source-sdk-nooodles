@@ -61,6 +61,6 @@ $Configuration
 		// warning C28160: Error annotation: Calling VirtualFreeEx without the MEM_RELEASE flag frees memory but not address descriptors (VADs); results in address space leaks.
 		// warning C6248: Setting a SECURITY_DESCRIPTOR's DACL to NULL will result in an unprotected object.
 		// warning C6102: Using value from failed function call
-		$DisableSpecificWarnings	"$BASE;6014;28159;28182;28183;28197;28198;28204;28247;28251;28301;28195;6340;28125;28160;6248;6102" [$ANALYZE && ($VS2012 || $VS2013)]
+		$DisableSpecificWarnings	"$BASE;6014;28159;28182;28183;28197;28198;28204;28247;28251;28301;28195;6340;28125;28160;6248;6102" [$ANALYZE && ($VS2019 || $VS2022)]
 	}
 }

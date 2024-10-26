@@ -227,7 +227,7 @@ public:
 	//---------------------------------
 	CBaseEntity		*GetAimTarget() { return m_hAimTarget; }
 	void			SetAimTarget( CBaseEntity *pTarget );
-	void			StopAiming( char *pszReason = NULL );
+	void			StopAiming( const char *pszReason = NULL );
 	bool			FindNewAimTarget();
 	void			OnNewLookTarget();
 	bool			ShouldBeAiming();
@@ -302,7 +302,7 @@ public:
 	void			InputSetReadinessMedium( inputdata_t &inputdata );
 	void			InputSetReadinessHigh( inputdata_t &inputdata );
 	void			InputLockReadiness( inputdata_t &inputdata );
-#if HL2_EPISODIC
+#ifdef HL2_EPISODIC
 	void			InputClearAllOuputs( inputdata_t &inputdata ); ///< annihilate every output on this npc
 #endif
 

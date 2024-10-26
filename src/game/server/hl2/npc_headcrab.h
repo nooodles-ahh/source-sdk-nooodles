@@ -268,7 +268,7 @@ public:
 	virtual void AlertSound( void );
 	virtual void ImpactSound( void );
 	virtual void TelegraphSound( void );
-#if HL2_EPISODIC
+#ifdef HL2_EPISODIC
 	virtual bool FInViewCone( CBaseEntity *pEntity );
 #endif
 
