@@ -2429,6 +2429,11 @@ class ALIGN16 FourVectors
 public:
 	fltx4 x, y, z;
 
+	void* operator new[](size_t i)
+	{
+		return _aligned_malloc(i, 16);
+	}
+
 	FORCEINLINE void DuplicateVector(Vector const &v)			//< set all 4 vectors to the same vector value
 	{
 		x=ReplicateX4(v.x);

@@ -138,8 +138,8 @@ void C_DynamicLight::ClientThink(void)
 		{
 #if DLIGHT_NO_WORLD_USES_ELIGHT
 			m_pDynamicLight = ShouldBeElight() != 0
-				? effects->CL_AllocElight( index )
-				: effects->CL_AllocDlight( index );
+				? effects->CL_AllocElight( m_index )
+				: effects->CL_AllocDlight( m_index );
 #else
 			m_pDynamicLight = effects->CL_AllocDlight( m_index );
 #endif
