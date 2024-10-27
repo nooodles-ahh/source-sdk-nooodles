@@ -1,0 +1,36 @@
+//-----------------------------------------------------------------------------
+//	TIER3.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+$Macro SRCDIR		".."
+$Include "$SRCDIR\vpc_scripts\source_lib_base.vpc"
+
+
+$Configuration
+{
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\public"
+		$PreprocessorDefinitions		"$BASE;"
+	}
+
+}
+
+$Project "tier3"
+{
+	$Folder "Source Files"
+	{
+		$File	"tier3.cpp"
+	}
+	
+	$Folder "Public Header Files"
+	{
+		$File	"$SRCDIR\public\tier3\tier3.h"
+	}
+
+	$Folder	"Link Libraries"
+	{
+ 	}
+}

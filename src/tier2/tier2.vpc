@@ -1,0 +1,40 @@
+//-----------------------------------------------------------------------------
+//	TIER2.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+$Macro SRCDIR		".."
+$Include "$SRCDIR\vpc_scripts\source_lib_base.vpc"
+
+
+$Configuration
+{
+
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\public"
+		$PreprocessorDefinitions		"$BASE;"
+	}
+
+}
+
+$Project "tier2"
+{
+	$Folder "Source Files"
+	{
+		$File	"tier2.cpp" \
+				"beamsegdraw.cpp" \
+				"fileutils.cpp" \
+				"meshutils.cpp" \
+				"$SRCDIR\public\materialsystem\MaterialSystemUtil.cpp"
+	}
+	
+	$Folder "Public Header Files"
+	{
+		$File	"$SRCDIR\public\tier2\tier2.h"
+	}
+
+	$Folder	"Link Libraries"
+	{
+ 	}
+}

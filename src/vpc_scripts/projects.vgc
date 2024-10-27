@@ -90,6 +90,16 @@ $Project "tier1"
 	"tier1\tier1.vpc" 	[$WINDOWS || $X360||$POSIX]
 }
 
+$Project "tier2"
+{
+	"tier2\tier2.vpc"
+}
+
+$Project "tier3"
+{
+	"tier3\tier3.vpc"
+}
+
 $Project "vbsp"
 {
 	"utils\vbsp\vbsp.vpc" [$WIN32]

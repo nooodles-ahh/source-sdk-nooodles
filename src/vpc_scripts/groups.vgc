@@ -21,12 +21,28 @@ $Group "game"
 	"raytrace"
 	"server"
 	"tier1"
+	"tier2"
+	"tier3"
 	"vgui_controls"
 }
 
 $Group "shaders"
 {
 	"game_shader_dx9"
+}
+
+$Group "tools"
+{
+	"fgdlib"
+	"raytrace"
+	"tier1"
+	"tier2"
+	"tier3"
+	"vbsp"
+	"vrad_dll"
+	"vrad_launcher"
+	"vvis_dll"
+	"vvis_launcher"
 }
 
 $Group "everything"
