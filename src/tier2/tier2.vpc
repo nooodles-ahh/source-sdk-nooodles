@@ -26,6 +26,7 @@ $Project "tier2"
 				"beamsegdraw.cpp" \
 				"fileutils.cpp" \
 				"meshutils.cpp" \
+				"renderutils.cpp" \
 				"$SRCDIR\public\materialsystem\MaterialSystemUtil.cpp"
 	}
 	
