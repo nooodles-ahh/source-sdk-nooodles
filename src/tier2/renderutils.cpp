@@ -10,6 +10,24 @@ IMaterial* s_pWireframeIgnoreZ = nullptr;
 IMaterial* s_pVertexColor = nullptr;
 IMaterial* s_pVertexColorIgnoreZ = nullptr;
 
+int s_pBoxFaceIndicesInsideOut[24] = {
+	0, 2, 6, 4,
+	5, 7, 3, 1,
+	0, 4, 5, 1,
+	2, 3, 7, 6,
+	0, 1, 3, 2,
+	4, 6, 7, 5
+};
+
+int s_pBoxFaceIndices[24] = {
+	0, 4, 6, 2,
+	5, 1, 3, 7,
+	0, 1, 5, 4,
+	2, 6, 7, 3,
+	0, 2, 3, 1,
+	4, 5, 7, 6
+};
+
 void InitializeStandardMaterials(void)
 {
     if (s_bMaterialsInitialized)
@@ -111,6 +129,33 @@ void DrawAxes(Vector* origin, Vector* pts, int idx, Color c, CMeshBuilder* meshB
 	return;
 }
 
+void GenerateBoxVertices(const Vector& vOrigin, const QAngle& angles, 
+	const Vector& vMins, const Vector& vMaxs, Vector* pVerts)
+{
+	matrix3x4_t matTransform;
+	AngleMatrix(angles, matTransform);
+	int iVert = 0;
+	for (int i = 0; i < 8; ++i)
+	{
+		Vector v;
+		if ((i & 1) == 0)
+			v.x = vMins.x;
+		else
+			v.x = vMaxs.x;
+	
+		if ((i & 2) == 0)
+			v.y = vMins.y;
+		else
+			v.y = vMaxs.y;
+
+		if ((i & 4) == 0)
+			v.z = vMins.z;
+		else
+			v.z = vMaxs.z;
+
+		VectorRotate(v.Base(), matTransform, pVerts[i].Base());
+	}
+}
 
 // Renders a wireframe sphere
 void RenderWireframeSphere(const Vector& vCenter, float flRadius, int nTheta, int nPhi, Color c, bool bZBuffer)
@@ -224,64 +269,60 @@ void RenderBox(const Vector& origin, const QAngle& angles, const Vector& mins, c
 	pRenderContext->BeginRender();
 	pRenderContext->Bind(pMaterial);
 
-	IMesh* pMesh = pRenderContext->GetDynamicMesh();
+	Vector verts[8];
 
+	GenerateBoxVertices(origin, angles, mins, maxs, verts);
+
+	IMesh* pMesh = pRenderContext->GetDynamicMesh();
 	CMeshBuilder meshBuilder;
 
-	// The four sides
-	meshBuilder.Begin(pMesh, MATERIAL_TRIANGLE_STRIP, 2 * 4);
-	for (int i = 0; i < 10; i++)
-	{
-		meshBuilder.Position3fv(v[i & 7].Base());
-		meshBuilder.Color4fv(color);
-		meshBuilder.AdvanceVertex();
-	}
-	meshBuilder.End();
-	pMesh->Draw();
+	// 36 verts max so 12 primitives
+	meshBuilder.Begin(pMesh, MATERIAL_TRIANGLES, 12);
 
-	// top and bottom
-	meshBuilder.Begin(pMesh, MATERIAL_TRIANGLE_STRIP, 2);
+	bool bSide = false;
+	uint col = c.GetRawColor();
+	int face = 0;
+	do {
+		Vector v1(0.f);
 
-	meshBuilder.Position3fv(v[6].Base());
-	meshBuilder.Color4fv(color);
-	meshBuilder.AdvanceVertex();
+		v1[face >> 1] = bSide ? 1.f : -1.f; // (&v1.x)[local_20 >> 1] = vVar2;
+		int* indicesArr = s_pBoxFaceIndicesInsideOut;
+		if (!bInsideOut)
+			indicesArr = s_pBoxFaceIndices;
 
-	meshBuilder.Position3fv(v[0].Base());
-	meshBuilder.Color4fv(color);
-	meshBuilder.AdvanceVertex();
+		int *indiceRow = (int*)(indicesArr + face);
+		int iVert = 1;
+		do {
+			int index1 = indiceRow[iVert];
+			int index2 = indiceRow[iVert + 1];
+			int index3 = indiceRow[0];
 
-	meshBuilder.Position3fv(v[4].Base());
-	meshBuilder.Color4fv(color);
-	meshBuilder.AdvanceVertex();
+			meshBuilder.Position3fv(verts[index3].Base());
+			meshBuilder.Color4ubv((unsigned char*)&col);
+			meshBuilder.Normal3fv(v1.Base());
+			meshBuilder.TexCoord2f(0, 0.f, 0.f);
+			meshBuilder.AdvanceVertex();
 
-	meshBuilder.Position3fv(v[2].Base());
-	meshBuilder.Color4fv(color);
-	meshBuilder.AdvanceVertex();
 
-	meshBuilder.End();
-	pMesh->Draw();
+			meshBuilder.Position3fv(verts[index2].Base());
+			meshBuilder.Color4ubv((unsigned char*)&col);
+			meshBuilder.Normal3fv(v1.Base());
+			meshBuilder.TexCoord2f(0, 1.f, iVert == 1 ? 1.f : 0.f);
+			meshBuilder.AdvanceVertex();
 
-	meshBuilder.Begin(pMesh, MATERIAL_TRIANGLE_STRIP, 2);
-
-	meshBuilder.Position3fv(v[1].Base());
-	meshBuilder.Color4fv(color);
-	meshBuilder.AdvanceVertex();
-
-	meshBuilder.Position3fv(v[7].Base());
-	meshBuilder.Color4fv(color);
-	meshBuilder.AdvanceVertex();
-
-	meshBuilder.Position3fv(v[3].Base());
-	meshBuilder.Color4fv(color);
-	meshBuilder.AdvanceVertex();
-
-	meshBuilder.Position3fv(v[5].Base());
-	meshBuilder.Color4fv(color);
-	meshBuilder.AdvanceVertex();
+			meshBuilder.Position3fv(verts[index1].Base());
+			meshBuilder.Color4ubv((unsigned char*)&col);
+			meshBuilder.Normal3fv(v1.Base());
+			meshBuilder.TexCoord2f(0, iVert == 1 ? 0.f : 1.f, 1.f);
+			meshBuilder.AdvanceVertex();
+			iVert = iVert + 1;
+		} while (iVert < 3);
+		face = face + 1;
+		bSide = !bSide;
+	} while (face < 6);
 
 	meshBuilder.End();
 	pMesh->Draw();
-
 }
 
 void RenderBox(const Vector& origin, const QAngle& angles, const Vector& mins, const Vector& maxs,
