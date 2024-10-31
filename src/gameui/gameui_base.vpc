@@ -1,0 +1,179 @@
+//-----------------------------------------------------------------------------
+//	GAMEUI.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+$Configuration
+{
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\gameui;$SRCDIR\gameui\dialogs;$SRCDIR\gameui\serverbrowser;"
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\gameui\legacy"
+		$PreprocessorDefinitions		"$BASE;VERSION_SAFE_STEAM_API_INTERFACES"
+		//$PreprocessorDefinitions			"$BASE;GAMEUI_EMBEDDED"
+	}
+}
+
+$Project
+{
+	$Folder	"GameUI"
+	{
+		$Folder "Legacy"
+		{
+			$File	"$SRCDIR\gameui\legacy\basemodpanel.cpp" \
+					"$SRCDIR\gameui\legacy\gamemenu.cpp"
+			{
+				$Configuration
+				{
+					$Compiler
+					{
+						$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+					}
+				}
+			}
+			$File	"$SRCDIR\gameui\legacy\basemodpanel.h" \
+					"$SRCDIR\gameui\legacy\gamemenu.h"
+		}
+	
+		$Folder "Dialogs"
+		{
+			$File	"$SRCDIR\gameui\dialogs\createmultiplayergamedialog.cpp" \
+					"$SRCDIR\gameui\dialogs\createmultiplayergamebotpage.cpp" \
+					"$SRCDIR\gameui\dialogs\createmultiplayergamegameplaypage.cpp" \
+					"$SRCDIR\gameui\dialogs\createmultiplayergameserverpage.cpp" \
+					"$SRCDIR\gameui\dialogs\gameconsoledialog.cpp" \
+					"$SRCDIR\gameui\dialogs\loadingdialog.cpp" \
+					"$SRCDIR\gameui\dialogs\optionsdialog.cpp" \
+					"$SRCDIR\gameui\dialogs\optionssubaudio.cpp" \
+					"$SRCDIR\gameui\dialogs\optionssubdifficulty.cpp" \
+					"$SRCDIR\gameui\dialogs\optionssubgame.cpp" \
+					"$SRCDIR\gameui\dialogs\optionssubkeyboard.cpp" \
+					"$SRCDIR\gameui\dialogs\optionssubmouse.cpp" \
+					"$SRCDIR\gameui\dialogs\multiplayeradvanceddialog.cpp" \
+					"$SRCDIR\gameui\dialogs\optionssubvideo.cpp" \
+					"$SRCDIR\gameui\dialogs\optionssubvoice.cpp" \
+					"$SRCDIR\gameui\dialogs\playerlistdialog.cpp" \
+					"$SRCDIR\gameui\dialogs\quitdialog.cpp"
+			{
+				$Configuration
+				{
+					$Compiler
+					{
+						$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+					}
+				}
+			}
+				
+			$File	"$SRCDIR\gameui\dialogs\createmultiplayergamedialog.h" \
+					"$SRCDIR\gameui\dialogs\createmultiplayergamebotpage.h" \
+					"$SRCDIR\gameui\dialogs\createmultiplayergamegameplaypage.h" \
+					"$SRCDIR\gameui\dialogs\createmultiplayergameserverpage.h" \
+					"$SRCDIR\gameui\dialogs\gameconsoledialog.h" \
+					"$SRCDIR\gameui\dialogs\loadingdialog.h" \
+					"$SRCDIR\gameui\dialogs\optionsdialog.h" \
+					"$SRCDIR\gameui\dialogs\optionssubaudio.h" \
+					"$SRCDIR\gameui\dialogs\optionssubdifficulty.h" \
+					"$SRCDIR\gameui\dialogs\optionssubgame.h" \
+					"$SRCDIR\gameui\dialogs\optionssubkeyboard.h" \
+					"$SRCDIR\gameui\dialogs\optionssubmouse.h" \
+					"$SRCDIR\gameui\dialogs\optionssubmultiplayer.h" \
+					"$SRCDIR\gameui\dialogs\multiplayeradvanceddialog.h" \
+					"$SRCDIR\gameui\dialogs\optionssubvideo.h" \
+					"$SRCDIR\gameui\dialogs\optionssubvoice.h" \
+					"$SRCDIR\gameui\dialogs\playerlistdialog.h" \
+					"$SRCDIR\gameui\dialogs\quitdialog.h"
+		}
+		
+		$Folder "Server Browser"
+		{
+			$File	"$SRCDIR\gameui\serverbrowser\serverbrowserdialog.cpp" \
+					"$SRCDIR\gameui\serverbrowser\serverlistpage.cpp"
+			{
+				$Configuration
+				{
+					$Compiler
+					{
+						$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+					}
+				}
+			}
+			$File	"$SRCDIR\gameui\serverbrowser\serverbrowserdialog.h" \
+					"$SRCDIR\gameui\serverbrowser\serverlistpage.h"
+		}
+	
+		$File	"$SRCDIR\gameui\basepanel.h" \
+				"$SRCDIR\gameui\gameconsole.h" \
+				"$SRCDIR\gameui\gameui_interface.h" \
+				"$SRCDIR\gameui\gameui_util.h" \
+				"$SRCDIR\gameui\modinfo.h" \
+				"$SRCDIR\gameui\rungameengine.h" \
+				"$SRCDIR\gameui\scriptobject.h" \
+				"$SRCDIR\gameui\bitmapimagepanel.h" \
+				"$SRCDIR\gameui\cvarnegatecheckbutton.h" \
+				"$SRCDIR\gameui\cvarslider.h" \
+				"$SRCDIR\gameui\cvartextentry.h" \
+				"$SRCDIR\gameui\cvartogglecheckbutton.h" \
+				"$SRCDIR\gameui\labeledcommandcombobox.h" \
+				"$SRCDIR\gameui\logopanel.h" \
+				"$SRCDIR\gameui\sys_utils.h" \
+				"$SRCDIR\gameui\urlbutton.h" \
+				"$SRCDIR\gameui\vcontrolslistpanel.h" \
+				"$SRCDIR\gameui\vguisystemmoduleloader.h"
+	
+		$File	"$SRCDIR\gameui\gameconsole.cpp" \
+				"$SRCDIR\gameui\gameui_interface.cpp" \
+				"$SRCDIR\gameui\gameui_util.cpp" \
+				"$SRCDIR\gameui\modinfo.cpp" \
+				"$SRCDIR\gameui\rungameengine.cpp" \
+				"$SRCDIR\gameui\scriptobject.cpp" \
+				"$SRCDIR\gameui\bitmapimagepanel.cpp" \
+				"$SRCDIR\gameui\cvarnegatecheckbutton.cpp" \
+				"$SRCDIR\gameui\cvarslider.cpp" \
+				"$SRCDIR\gameui\cvartextentry.cpp" \
+				"$SRCDIR\gameui\cvartogglecheckbutton.cpp" \
+				"$SRCDIR\gameui\labeledcommandcombobox.cpp" \
+				"$SRCDIR\gameui\logopanel.cpp" \
+				"$SRCDIR\gameui\sys_utils.cpp" \
+				"$SRCDIR\gameui\urlbutton.cpp" \
+				"$SRCDIR\gameui\vcontrolslistpanel.cpp" \
+				"$SRCDIR\gameui\vguisystemmoduleloader.cpp"
+		{
+			$Configuration
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+				}
+			}
+		}
+	}
+	
+	$Folder "Public Header Files"
+	{
+		$File	"$SRCDIR\gameui\engineinterface.h"
+		$File	"$SRCDIR\public\materialsystem\MaterialSystemUtil.cpp"
+		{
+			$Configuration
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+				}
+			}
+		}
+	}
+	
+	$Folder	"Link Libraries"
+	{
+		$Lib	"$LIBPUBLIC\bitmap"
+		$Lib	"$LIBPUBLIC\mathlib"
+		$Lib	"$LIBPUBLIC\tier2"
+		$Lib	"$LIBPUBLIC\tier3"
+		$Lib	"$LIBPUBLIC\dmxloader"
+		$Lib	"$LIBPUBLIC\matsys_controls"
+		$Lib	"$LIBPUBLIC\vgui_controls"
+		$Lib	"$LIBPUBLIC\vtf"
+		$ImpLib "$LIBPUBLIC\steam_api"
+		//$Lib	"$LIBCOMMON\libjpeg"
+	}
+}

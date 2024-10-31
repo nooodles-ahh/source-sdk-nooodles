@@ -76,6 +76,20 @@ public:
 	// runs the specific animation command (doesn't use script file at all)
 	void RunAnimationCommand(vgui::Panel *panel, const char *variable, float targetValue, float startDelaySeconds, float durationSeconds, Interpolators_e interpolator, float animParameter = 0 );
 	void RunAnimationCommand(vgui::Panel *panel, const char *variable, Color targetValue, float startDelaySeconds, float durationSeconds, Interpolators_e interpolator, float animParameter = 0 );
+#ifdef VGUI_ENHANCEMENTS
+	struct PublicValue_t
+	{
+		PublicValue_t( float _a = 0.0f, float _b = 0.0f, float _c = 0.0f, float _d = 0.0f ) :
+			a( _a ), b( _b ), c( _c ), d( _d ) {};
+		PublicValue_t( int _a, int _b, int _c, int _d ) :
+			a( (float)_a ), b( (float)_b ), c( (float)_c ), d( (float)_d ) {};
+		PublicValue_t( Color color ) :
+			a( (float)color.r() ), b( (float)color.g() ), c( (float)color.b() ), d( (float)color.a() ) {};
+
+		float a, b, c, d;
+	};
+	void RunAnimationCommand( vgui::Panel* panel, const char* variable, PublicValue_t targetValue, float startDelaySeconds, float durationSeconds, Interpolators_e interpolator, float animParameter = 0 );
+#endif
 
 private:
 	bool UpdateScreenSize();

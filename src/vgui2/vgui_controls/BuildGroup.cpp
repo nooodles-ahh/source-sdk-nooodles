@@ -856,7 +856,7 @@ void BuildGroup::PanelAdded(Panel *panel)
 	int c = _panelDar.Count();
 	for ( int i = 0; i < c; ++i )
 	{
-		if ( _panelDar[ i ].Get() == temp)
+		if ( _panelDar[ i ].Get() == temp )
 		{
 			return;
 		}
@@ -1346,9 +1346,9 @@ void BuildGroup::GetSettings( KeyValues *resourceData )
 		// do not get setting for ruler labels.
 		if (_showRulers) // rulers are visible
 		{
-			for (int j = 0; j < 4; j++)
+			for (int i = 0; i < 4; i++)
 			{
-				if (panel == _rulerNumber[j])
+				if (panel == _rulerNumber[i])
 				{
 					isRuler = true;
 					break;

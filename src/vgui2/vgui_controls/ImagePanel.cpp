@@ -16,11 +16,133 @@
 #include <vgui_controls/ImagePanel.h>
 #include <vgui_controls/Image.h>
 #include <vgui_controls/Controls.h>
+#ifdef VGUI_ENHANCEMENTS
+#include "vgui/ILocalize.h"
+#include "bitmap/TGALoader.h"
+#endif
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
 
 using namespace vgui;
+
+#ifdef VGUI_ENHANCEMENTS
+class TGAImage : public IImage
+{
+public:
+	TGAImage(const char * pszTGA, const unsigned char* rgba, int wide, int tall )
+	{
+		m_nX = m_nY = 0;
+		m_TGAwide = m_wide = wide;
+		m_TGAtall = m_tall = tall;
+		m_iTextureID = surface()->CreateNewTextureID(true);
+		surface()->DrawSetTextureRGBA( m_iTextureID, rgba, m_TGAwide, m_TGAtall, true, false );
+		m_Color = Color( 255, 255, 255, 255 );
+	}
+
+	~TGAImage()
+	{
+		surface()->DestroyTextureID( m_iTextureID );
+	}
+
+	// Call to Paint the image
+	// Image will draw within the current panel context at the specified position
+	virtual void Paint()
+	{
+		surface()->DrawSetTexture( m_iTextureID );
+		int w, t;
+		surface()->DrawGetTextureSize(m_iTextureID, w, t );
+		surface()->DrawSetColor( 255, 255, 255, 255 );
+
+		// need create texture coords to match the aspect ratio of the image
+		float texs1 = (float)m_TGAwide / (float)w;
+		float text1 = (float)m_TGAtall / (float)t;
+
+		const float flHalfPixelX = ( 0.5f / 180.0f );
+		const float flHalfPixelY = ( 0.5f / 100.0f );
+
+		surface()->DrawTexturedSubRect(
+			0, 0, m_wide, m_tall,
+			0.0f, 0.0f, texs1 - flHalfPixelX, text1 - flHalfPixelY );
+	}
+
+	// Set the position of the image
+	virtual void SetPos( int x, int y )
+	{
+		m_nX = x;
+		m_nY = y;
+	}
+
+	// Gets the size of the content
+	virtual void GetContentSize( int& wide, int& tall )
+	{
+		wide = m_TGAwide;
+		tall = m_TGAtall;
+	}
+
+	// Get the size the image will actually draw in (usually defaults to the content size)
+	virtual void GetSize( int& wide, int& tall )
+	{
+		GetContentSize( wide, tall );
+	}
+
+	// Sets the size of the image
+	virtual void SetSize( int wide, int tall )
+	{
+		m_wide = wide;
+		m_tall = tall;
+	}
+
+	// Set the draw color 
+	virtual void SetColor( Color col )
+	{}
+	
+	// not for general purpose use
+	// evicts the underlying image from memory if refcounts permit, otherwise ignored
+	// returns true if eviction occurred, otherwise false
+	virtual bool Evict()
+	{
+		return false;
+	}
+
+	virtual int GetNumFrames()
+	{
+		return 0;
+	}
+	virtual void SetFrame( int nFrame ) 
+	{
+		return;
+	}
+
+	virtual HTexture GetID()
+	{
+		return 0;
+	}
+
+	virtual void SetRotation( int iRotation )
+	{
+		return;
+	}
+
+private:
+	Color m_Color;
+	int m_iTextureID;
+	int m_nX, m_nY;
+	int m_TGAwide, m_TGAtall;
+	int m_wide, m_tall;
+};
+
+TGAImage* GetTGAImage(const char *pszTGAName)
+{
+	CUtlMemory<unsigned char> tga;
+	int w, h;
+	if ( TGALoader::LoadRGBA8888( pszTGAName, tga, w, h ) )
+	{
+		return new TGAImage( pszTGAName, tga.Base(), w, h );
+	}
+	return nullptr;
+}
+#endif
 
 DECLARE_BUILD_FACTORY( ImagePanel );
 
@@ -43,6 +165,10 @@ ImagePanel::ImagePanel(Panel *parent, const char *name) : Panel(parent, name)
 	m_FillColor = Color(0, 0, 0, 0);
 	m_DrawColor = Color(255,255,255,255);
 	m_iRotation = ROTATED_UNROTATED;
+#ifdef VGUI_ENHANCEMENTS
+	m_bIsTGA = false;
+	m_bWaitingForDialogVar = false;
+#endif
 
 	SetImage( m_pImage );
 
@@ -89,8 +215,33 @@ void ImagePanel::SetImage(const char *imageName)
 	delete [] m_pszImageName;
 	m_pszImageName = new char[ len ];
 	Q_strncpy(m_pszImageName, imageName, len );
+#ifdef VGUI_ENHANCEMENTS
+	m_bIsTGA = V_stristr( imageName, ".tga" ) != nullptr;
+
+	if( !m_bWaitingForDialogVar )
+#endif
 	InvalidateLayout(false, true); // force applyschemesettings to run
 }
+
+#ifdef VGUI_ENHANCEMENTS
+// we don't set text but we want to be able to handle SetControlString
+void ImagePanel::OnSetText( KeyValues* params )
+{
+	KeyValues* pkvText = params->FindKey( "text", false );
+	if ( !pkvText )
+		return;
+
+	if ( pkvText->GetDataType() == KeyValues::TYPE_STRING )
+	{
+		SetImage( pkvText->GetString() );
+	}
+	else if ( pkvText->GetDataType() == KeyValues::TYPE_WSTRING )
+	{
+		Assert( !"ImagePanel::OnSetText:  WSTRING not supported" );
+		DevMsg( "ImagePanel::OnSetText:  WSTRING not supported\n" );
+	}
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -294,10 +445,31 @@ void ImagePanel::ApplySettings(KeyValues *inResourceData)
 	m_bTileHorizontally = inResourceData->GetInt("tileHorizontally", m_bTileImage);
 	m_bTileVertically = inResourceData->GetInt("tileVertically", m_bTileImage);
 	const char *imageName = inResourceData->GetString("image", "");
+#ifdef VGUI_ENHANCEMENTS
+	if ( *imageName )
+	{
+		if ( imageName[ 0 ] == '%' && imageName[ strlen( imageName ) - 1 ] == '%' )
+		{
+			// it's a variable, set it to be a special variable localized string
+			wchar_t unicodeVar[ 256 ];
+			g_pVGuiLocalize->ConvertANSIToUnicode( imageName, unicodeVar, sizeof( unicodeVar ) );
+			char varName[ 256 ];
+			V_snprintf( varName, sizeof( varName ), "#var_%s", imageName );
+			g_pVGuiLocalize->AddString( varName + 1, unicodeVar, "" );
+			m_bWaitingForDialogVar = true;
+			SetImage( varName );
+}
+		else
+		{
+			SetImage( imageName );
+		}
+	}
+#else
 	if ( *imageName )
 	{
 		SetImage( imageName );
 	}
+#endif
 
 	const char *pszFillColor = inResourceData->GetString("fillcolor", "");
 	if (*pszFillColor)
@@ -364,7 +536,12 @@ void ImagePanel::ApplySchemeSettings( IScheme *pScheme )
 	BaseClass::ApplySchemeSettings(pScheme);
 	if ( m_pszImageName && strlen( m_pszImageName ) > 0 )
 	{
-		SetImage(scheme()->GetImage(m_pszImageName, m_bScaleImage));
+#ifdef VGUI_ENHANCEMENTS
+		if( m_bIsTGA )
+			SetImage( GetTGAImage( m_pszImageName ) );
+		else
+#endif
+			SetImage(scheme()->GetImage(m_pszImageName, m_bScaleImage));
 	}
 }
 
@@ -471,3 +648,21 @@ void ImagePanel::SetFrame( int nFrame )
 
 	return m_pImage->SetFrame( nFrame );
 }
+
+#ifdef VGUI_ENHANCEMENTS
+void ImagePanel::OnDialogVariablesChanged( KeyValues* dialogVariables )
+{
+	// if m_szTGAName starts with #var_ then we need to localize the string
+	if ( m_pszImageName[ 0 ] != '#' )
+		return;
+
+	m_bWaitingForDialogVar = false;
+	// reconstruct the string from the variables
+	wchar_t buf[ MAX_PATH ];
+	g_pVGuiLocalize->ConstructString( buf, sizeof( buf ), m_pszImageName, dialogVariables );
+	char szLocalized[ MAX_PATH ];
+	g_pVGuiLocalize->ConvertUnicodeToANSI( buf, szLocalized, sizeof( szLocalized ) );
+
+	SetImage( szLocalized );
+}
+#endif

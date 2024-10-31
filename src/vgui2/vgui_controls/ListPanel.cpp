@@ -1901,19 +1901,19 @@ void ListPanel::PerformLayout()
 				if (!header->IsVisible())
 					continue;
 
-				int wide_ = header->GetWide();
+				int wide = header->GetWide();
 
 				if ( itemID == m_iEditModeItemID &&
 					 j == m_iEditModeColumn )
 				{
 
 					m_hEditModePanel->SetPos( x + m_iTableStartX + 2, (drawcount * m_iRowHeight) + m_iTableStartY);
-					m_hEditModePanel->SetSize( wide_, m_iRowHeight - 1 );
+					m_hEditModePanel->SetSize( wide, m_iRowHeight - 1 );
 
 					bDone = true;
 				}
 
-				x += wide_;
+				x += wide;
 			}
 
 			drawcount++;
@@ -1988,7 +1988,7 @@ void ListPanel::Paint()
 			if (!header->IsVisible())
 				continue;
 
-			int wide_ = header->GetWide();
+			int wide = header->GetWide();
 
 			if (render)
 			{
@@ -2005,7 +2005,7 @@ void ListPanel::Paint()
 
 				render->SetPos( xpos, (drawcount * m_iRowHeight) + m_iTableStartY);
 
-				int right = min( xpos + wide_, maxw );
+				int right = min( xpos + wide, maxw );
 				int usew = right - xpos;
 				render->SetSize( usew, m_iRowHeight - 1 );
 
@@ -2530,13 +2530,13 @@ void ListPanel::OnKeyCodePressed(KeyCode code)
 	// move the newly selected item to within the visible range
 	if ( nRowsPerPage < nTotalRows )
 	{
-		int nStartItemvbar = m_vbar->GetValue();
-		if ( nSelectedRow < nStartItemvbar)
+		int nStartItem = m_vbar->GetValue();
+		if ( nSelectedRow < nStartItem )
 		{
 			// move the list back to match
 			m_vbar->SetValue( nSelectedRow );
 		}
-		else if ( nSelectedRow >= nStartItemvbar + nRowsPerPage )
+		else if ( nSelectedRow >= nStartItem + nRowsPerPage )
 		{
 			// move list forward to match
 			m_vbar->SetValue( nSelectedRow - nRowsPerPage + 1);

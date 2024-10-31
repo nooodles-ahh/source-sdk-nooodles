@@ -1249,8 +1249,13 @@ void Label::ApplySettings( KeyValues *inResourceData )
 
 	int inset_x = inResourceData->GetInt("textinsetx", _textInset[0]);
 	int inset_y = inResourceData->GetInt("textinsety", _textInset[1]);
+
 	// Had to play it safe and add a new key for backwards compatibility
 	m_bUseProportionalInsets = inResourceData->GetInt("use_proportional_insets", 0) > 0;
+#ifdef VGUI_ENHANCEMENTS
+	if ( IsProportional() )
+		m_bUseProportionalInsets = true;
+#endif
 	if ( m_bUseProportionalInsets )
 	{
 		inset_x = scheme()->GetProportionalScaledValueEx( GetScheme(), inset_x );

@@ -68,7 +68,7 @@ protected:
 	virtual void GetSettings(KeyValues *outResourceData);
 	virtual void ApplySettings(KeyValues *inResourceData);
 	virtual const char *GetDescription();
-#ifdef _X360
+#if defined(_X360) || defined(VGUI_ENHANCEMENTS)
 	virtual void OnKeyCodePressed(KeyCode code);
 #endif
 	virtual void OnKeyCodeTyped(KeyCode code);
@@ -108,7 +108,7 @@ protected:
 	Color m_TrackColor;
 	Color m_DisabledTextColor1;
 	Color m_DisabledTextColor2;
-#ifdef _X360
+#if defined(_X360) || defined(VGUI_ENHANCEMENTS)
 	Color m_DepressedBgColor;
 #endif
 

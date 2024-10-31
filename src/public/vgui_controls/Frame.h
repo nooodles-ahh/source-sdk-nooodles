@@ -252,7 +252,11 @@ private:
 	bool	m_iClientInsetXOverridden : 1;
 										 
 	CPanelAnimationVarAliasType( int, m_iTitleTextInsetXOverride, "titletextinsetX", "0", "proportional_int" );
+#ifdef VGUI_ENHANCEMENTS
+	CPanelAnimationVarAliasType( int, m_iTitleTextInsetYOverride, "titletextinsetY", "0", "proportional_int");
+#else
 	CPanelAnimationVar( int, m_iTitleTextInsetYOverride, "titletextinsetY", "0" );
+#endif
 };
 
 } // namespace vgui

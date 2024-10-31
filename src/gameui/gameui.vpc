@@ -1,0 +1,42 @@
+//-----------------------------------------------------------------------------
+//	GAMEUI.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		".."
+$Macro OUTBINDIR	"$SRCDIR\..\game\mod_hl2mp\bin"
+$Macro OUTBINNAME	"GameUI"
+
+$Include "$SRCDIR\vpc_scripts\source_dll_base.vpc"
+$Include "$SRCDIR\gameui\gameui_base.vpc"
+
+$Configuration
+{
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;.;"
+		$PreprocessorDefinitions		"$BASE;"
+	}
+}
+
+$Project "GameUI"
+{
+	$Folder "Public Header Files"
+	{
+		$File	"$SRCDIR\common\language.cpp" \
+				"$SRCDIR\public\vgui_controls\vgui_controls.cpp"
+		{
+			$Configuration
+			{
+				$Compiler
+				{
+					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+				}
+			}
+		}
+		
+		$File	"$SRCDIR\public\tier1\KeyValues.h" \
+				"$SRCDIR\public\vstdlib\IKeyValuesSystem.h"
+	}
+}

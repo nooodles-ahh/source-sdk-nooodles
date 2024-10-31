@@ -179,6 +179,13 @@ Color CheckButton::GetButtonFgColor()
 		return _selectedFgColor;
 	}
 
+#ifdef VGUI_ENHANCEMENTS
+	if ( HasFocus() )
+	{
+		return _selectedFgColor;
+	}
+#endif
+
 	return BaseClass::GetButtonFgColor();
 }
 #endif

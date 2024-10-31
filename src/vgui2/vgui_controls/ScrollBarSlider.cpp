@@ -17,8 +17,11 @@
 
 #include <vgui_controls/ScrollBarSlider.h>
 #include <vgui_controls/Controls.h>
+#ifdef VGUI_ENHANCEMENTS
+#include <vgui_controls/AnimationController.h>
+#endif
 
-#include <math.h>
+//#include <math.h>
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
@@ -37,7 +40,13 @@ ScrollBarSlider::ScrollBarSlider(Panel *parent, const char *panelName, bool vert
 	_range[1]=0;
 	_rangeWindow=0;
 	_buttonOffset=0;
+#ifndef VGUI_ENHANCEMENTS
 	_ScrollBarSliderBorder=NULL;
+#endif
+#ifdef VGUI_ENHANCEMENTS
+	_desiredValue = 0.f;
+	_bSmoothScrolling = false;
+#endif
 	RecomputeNobPosFromValue();
 	SetBlockDragChaining( true );
 }
@@ -77,6 +86,18 @@ void ScrollBarSlider::SetValue(int value)
 		value = _range[0];
 	}
 
+#ifdef VGUI_ENHANCEMENTS
+	_desiredValue = value;
+	if ( _bSmoothScrolling )
+	{
+		if ( _desiredValue != oldValue )
+		{
+			vgui::GetAnimationController()->RunAnimationCommand( this, "_value", _desiredValue, 0.0f, 0.1f, vgui::AnimationController::INTERPOLATOR_LINEAR );
+		}
+		return;
+	}
+#endif
+
 	_value = value;
 	RecomputeNobPosFromValue();
 
@@ -86,6 +107,18 @@ void ScrollBarSlider::SetValue(int value)
 	}
 }
 
+#ifdef VGUI_ENHANCEMENTS
+void ScrollBarSlider::OnThink()
+{
+	BaseClass::OnThink();
+	if ( _value != (int)_desiredValue )
+	{
+		RecomputeNobPosFromValue();
+		SendScrollBarSliderMovedMessage();
+	}
+}
+#endif
+
 //-----------------------------------------------------------------------------
 // Purpose: Get the ScrollBarSlider value of the nob.
 //-----------------------------------------------------------------------------
@@ -93,6 +126,13 @@ int ScrollBarSlider::GetValue()
 {
 	return _value;
 }
+
+#ifdef VGUI_ENHANCEMENTS
+int ScrollBarSlider::GetDesiredValue()
+{
+	return _desiredValue;
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -251,6 +291,10 @@ void ScrollBarSlider::RecomputeValueFromNobPos()
 	{
 		_value = _range[0];
 	}
+
+#ifdef VGUI_ENHANCEMENTS
+	_desiredValue = (float)_value;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -326,11 +370,19 @@ void ScrollBarSlider::ApplySchemeSettings(IScheme *pScheme)
 
 	if ( newBorder )
 	{
+#ifdef VGUI_ENHANCEMENTS
+		SetBorder( newBorder );
+#else
 		_ScrollBarSliderBorder = newBorder;
+#endif
 	}
 	else
 	{
+#ifdef VGUI_ENHANCEMENTS
+		SetBorder( pScheme->GetBorder( "ButtonBorder" ) );
+#else
 		_ScrollBarSliderBorder = pScheme->GetBorder("ButtonBorder");
+#endif
 	}
 }
 
@@ -342,10 +394,19 @@ void ScrollBarSlider::ApplySettings( KeyValues *pInResourceData )
 	BaseClass::ApplySettings( pInResourceData );
 
 	const char *pButtonBorderName = pInResourceData->GetString( "ButtonBorder", NULL );
+	
 	if ( pButtonBorderName )
 	{
+#ifndef VGUI_ENHANCEMENTS
 		_ScrollBarSliderBorder = vgui::scheme()->GetIScheme( GetScheme() )->GetBorder( pButtonBorderName );
+#else
+		SetBorder( vgui::scheme()->GetIScheme( GetScheme() )->GetBorder( pButtonBorderName ) );
+#endif
 	}
+
+#ifdef VGUI_ENHANCEMENTS
+	_bSmoothScrolling = pInResourceData->GetBool( "SmoothScrolling", _bSmoothScrolling);
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -374,25 +435,54 @@ void ScrollBarSlider::Paint()
 			surface()->DrawFilledRect(1, _nobPos[0], wide - 2, _nobPos[1]);
 		}
 
+#ifndef VGUI_ENHANCEMENTS
 		// border
 		if (_ScrollBarSliderBorder)
 		{
 			_ScrollBarSliderBorder->Paint(0, _nobPos[0], wide, _nobPos[1]);
 		}
+#endif
 	}
 	else
 	{
 		// horizontal nob
 		surface()->DrawFilledRect(_nobPos[0], 1, _nobPos[1], tall - 2 );
 
+#ifndef VGUI_ENHANCEMENTS
 		// border
 		if (_ScrollBarSliderBorder)
 		{
 			_ScrollBarSliderBorder->Paint(_nobPos[0] - 1, 1, _nobPos[1], tall );
 		}
+#endif
 	}
-
 }
+
+#ifdef VGUI_ENHANCEMENTS
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void ScrollBarSlider::PaintBorder()
+{
+	int wide, tall;
+	GetPaintSize( wide, tall );
+
+	if ( !IsSliderVisible() )
+		return;
+
+	if ( _vertical )
+	{
+		// border
+		if( GetBorder() )
+			GetBorder()->Paint( 0, _nobPos[ 0 ], wide, _nobPos[ 1 ] );
+	}
+	else
+	{
+		if ( GetBorder() )
+			GetBorder()->Paint( _nobPos[ 0 ] - 1, 1, _nobPos[ 1 ], tall );
+	}
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose:
@@ -426,7 +516,11 @@ void ScrollBarSlider::SetRange(int min,int max)
 	_range[1]=max;
 
 	// update the value (forces it within the range)
+#ifdef VGUI_ENHANCEMENTS
+	SetValue( _desiredValue );
+#else
 	SetValue( _value );
+#endif
 	InvalidateLayout();
 }
 

@@ -103,6 +103,156 @@ ConVar tf_strict_mouse_up_events( "tf_strict_mouse_up_events", "0", FCVAR_ARCHIV
 // Temporary convar to help debug why the MvMVictoryMannUpPanel TabContainer is sometimes way off to the left.
 ConVar tf_debug_tabcontainer( "tf_debug_tabcontainer", "0", FCVAR_HIDDEN, "Spew TabContainer dimensions." );
 
+#ifdef VGUI_ENHANCEMENTS
+class MessageHandler
+{
+public:
+	MessageHandler()
+	{
+		Reset();
+		m_bMousePressed = false;
+		m_mousePressedPanel = NULL;
+		m_bIsCapturing = false;
+	}
+
+	void HandleStaggeredMessages()
+	{
+		if (!IsActive())
+			return;
+
+		vgui::VPANEL mouseOverPanel = vgui::input()->GetMouseOver();
+		if (mouseOverPanel == vgui::INVALID_PANEL || mouseOverPanel == NULL)
+			return;
+
+		vgui::Panel* panel = vgui::ipanel()->GetPanel(mouseOverPanel, vgui::GetControlsModuleName());
+		if (!panel)
+			return;
+
+		m_bIsCapturing = false;
+
+		if (m_mousePressedCodeDouble != BUTTON_CODE_NONE)
+		{
+			panel->InternalMouseDoublePressed(m_mousePressedCodeDouble);
+			m_bMousePressed = true;
+			m_mousePressedPanel = g_pVGui->PanelToHandle(mouseOverPanel);
+		}
+		if (m_mousePressedCode != BUTTON_CODE_NONE)
+		{
+			panel->InternalMousePressed(m_mousePressedCode);
+			m_bMousePressed = true;
+			m_mousePressedPanel = g_pVGui->PanelToHandle(mouseOverPanel);
+		}
+		if (m_mouseReleasedCode != BUTTON_CODE_NONE)
+		{
+			if (m_mousePressedPanel)
+			{
+				VPANEL mousePressedPanel = g_pVGui->HandleToPanel(m_mousePressedPanel);
+				if (mousePressedPanel)
+				{
+					vgui::Panel* pressedpanel = vgui::ipanel()->GetPanel(mousePressedPanel, vgui::GetControlsModuleName());
+					if (pressedpanel)
+						pressedpanel->InternalMouseReleased(m_mouseReleasedCode);
+				}
+			}
+			else
+			{
+				panel->InternalMouseReleased(m_mouseReleasedCode);
+			}
+			m_bMousePressed = false;
+			m_mousePressedPanel = NULL;
+		}
+
+		if (!m_mousePressedPanel)
+		{
+			if (m_mouseEnteredPanel.Get() && panel)
+			{
+				panel->InternalCursorEntered();
+			}
+		}
+
+
+		if (m_mouseExitedPanel.Get())
+		{
+			m_mouseExitedPanel.Get()->InternalCursorExited();
+		}
+
+		Reset();
+		m_bIsCapturing = true;
+	}
+
+	void SetMousePressedCode(vgui::MouseCode code)
+	{
+		m_mousePressedCode = code;
+	}
+	void SetMousePressedCodeDouble(vgui::MouseCode code)
+	{
+		m_mousePressedCodeDouble = code;
+	}
+	void SetMouseReleasedCode(vgui::MouseCode code)
+	{
+		m_mouseReleasedCode = code;
+	}
+	void SetMousePos(int x, int y)
+	{
+		m_mouseMoved = true;
+		m_mouseXPos = x;
+		m_mouseYPos = y;
+	}
+	void SetMouseExited(vgui::Panel* panel)
+	{
+		m_mouseExitedPanel.Set(panel);
+	}
+
+	void SetMouseEntered(vgui::Panel* panel)
+	{
+		m_mouseEnteredPanel.Set(panel);
+	}
+
+	void SetCapturing(bool state)
+	{
+		m_bIsCapturing = state;
+	}
+
+	bool IsCapturing()
+	{
+		return IsActive() && m_bIsCapturing;
+	}
+
+	bool IsActive()
+	{
+		return false;
+	}
+
+private:
+	void Reset()
+	{
+		m_mousePressedCode = BUTTON_CODE_NONE;
+		m_mousePressedCodeDouble = BUTTON_CODE_NONE;
+		m_mouseReleasedCode = BUTTON_CODE_NONE;
+		m_mouseXPos = 0;
+		m_mouseYPos = 0;
+		m_mouseMoved = 0;
+		m_mouseEnteredPanel.Set( nullptr );
+		m_mouseExitedPanel.Set( nullptr );
+	}
+
+private:
+	vgui::MouseCode m_mousePressedCode;
+	vgui::MouseCode m_mousePressedCodeDouble;
+	vgui::MouseCode m_mouseReleasedCode;
+	bool m_mouseMoved;
+	int m_mouseXPos;
+	int m_mouseYPos;
+
+	bool m_bMousePressed;
+	HPanel m_mousePressedPanel;
+	PHandle m_mouseEnteredPanel;
+	PHandle m_mouseExitedPanel;
+
+	bool m_bIsCapturing;
+} g_MessageHandler;
+#endif
+
 #if defined( VGUI_USEDRAGDROP )
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -761,6 +911,10 @@ void Panel::Init( int x, int y, int wide, int tall )
 	m_LastNavDirection = ND_NONE;
 	m_bWorldPositionCurrentFrame = false;
 	m_bForceStereoRenderToFrameBuffer = false;
+
+#ifdef VGUI_ENHANCEMENTS
+	g_MessageHandler.SetCapturing( true );
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1114,6 +1268,10 @@ void Panel::Repaint()
 //-----------------------------------------------------------------------------
 void Panel::Think()
 {
+#ifdef VGUI_ENHANCEMENTS
+	g_MessageHandler.HandleStaggeredMessages();
+#endif
+
 	if (IsVisible())
 	{	
 		// update any tooltips
@@ -1794,6 +1952,14 @@ void Panel::InternalCursorMoved(int x, int y)
 
 void Panel::InternalCursorEntered()
 {
+#ifdef VGUI_ENHANCEMENTS
+	if( g_MessageHandler.IsCapturing() )
+	{
+		g_MessageHandler.SetMouseEntered(this);
+		return;
+	}
+#endif
+
 	if (IsCursorNone() || !IsMouseInputEnabled())
 		return;
 	
@@ -1816,6 +1982,14 @@ void Panel::InternalCursorEntered()
 
 void Panel::InternalCursorExited()
 {
+#ifdef VGUI_ENHANCEMENTS
+	if ( g_MessageHandler.IsCapturing() )
+	{
+		g_MessageHandler.SetMouseExited(this);
+		return;
+	}
+#endif
+
 	if (IsCursorNone() || !IsMouseInputEnabled())
 		return;
 	
@@ -1824,6 +1998,7 @@ void Panel::InternalCursorExited()
 
 	if (m_pTooltips)
 	{
+		m_pTooltips->ResetDelay();
 		m_pTooltips->HideTooltip();
 	}
 
@@ -1896,6 +2071,14 @@ bool Panel::ShouldHandleInputMessage()
 
 void Panel::InternalMousePressed(int code)
 {
+#ifdef VGUI_ENHANCEMENTS
+	if( g_MessageHandler.IsCapturing() )
+	{
+		g_MessageHandler.SetMousePressedCode((MouseCode)code);
+		return;
+	}
+#endif
+
 	long curtime = system()->GetTimeMillis();
 	if ( IsTriplePressAllowed() )
 	{
@@ -1970,6 +2153,14 @@ void Panel::InternalMousePressed(int code)
 
 void Panel::InternalMouseDoublePressed(int code)
 {
+#ifdef VGUI_ENHANCEMENTS
+	if( g_MessageHandler.IsCapturing() )
+	{
+		g_MessageHandler.SetMousePressedCodeDouble((MouseCode)code);
+		return;
+	}
+#endif
+
 	m_lLastDoublePressTime = system()->GetTimeMillis();
 
 	if ( !ShouldHandleInputMessage() )
@@ -2056,6 +2247,14 @@ void Panel::InternalMouseTriplePressed( int code )
 
 void Panel::InternalMouseReleased(int code)
 {
+#ifdef VGUI_ENHANCEMENTS
+	if( g_MessageHandler.IsCapturing() )
+	{
+		g_MessageHandler.SetMouseReleasedCode((MouseCode)code);
+		return;
+	}
+#endif
+
 #if defined( VGUI_USEDRAGDROP )
 	if ( g_DragDropCapture.Get() )
 	{
@@ -2952,7 +3151,7 @@ void Panel::OnThink()
 			return;
 		}
 
-		if ( m_pDragDrop->m_hCurrentDrop )
+		if ( m_pDragDrop->m_hCurrentDrop.Get() != 0 )
 		{
 			if ( !input()->IsMouseDown( MOUSE_LEFT ) )
 			{
@@ -3714,8 +3913,13 @@ void Panel::SetPaintBackgroundEnabled(bool state)
 
 void Panel::SetPaintBackgroundType( int type )
 {
+#ifdef VGUI_ENHANCEMENTS
+	// still make sure nothing higher than 3 is set
+	m_nPaintBackgroundType = clamp( type, 0, 3 );
+#else
 	// HACK only 0 through 2 supported for now
 	m_nPaintBackgroundType = clamp( type, 0, 2 );
+#endif
 }
 
 void Panel::SetPaintEnabled(bool state)
@@ -4083,9 +4287,11 @@ void Panel::UpdateSiblingPin( void )
 //-----------------------------------------------------------------------------
 void Panel::ApplySchemeSettings(IScheme *pScheme)
 {
+#ifndef VGUI_ENHANCEMENTS
 	// get colors
 	SetFgColor(GetSchemeColor("Panel.FgColor", pScheme));
 	SetBgColor(GetSchemeColor("Panel.BgColor", pScheme));
+#endif
 
 #if defined( VGUI_USEDRAGDROP )
 	m_clrDragFrame = pScheme->GetColor("DragDrop.DragFrame", Color(255, 255, 255, 192));
@@ -6503,6 +6709,9 @@ void Panel::DrawBox(int x, int y, int wide, int tall, Color color, float normali
 	int cornerWide, cornerTall;
 	GetCornerTextureSize( cornerWide, cornerTall );
 
+	cornerWide = PROPORTIONAL_VALUE(cornerWide);
+	cornerTall = PROPORTIONAL_VALUE(cornerTall);
+
 	// draw the background in the areas not occupied by the corners
 	// draw it in three horizontal strips
 	surface()->DrawSetColor(color);
@@ -6611,7 +6820,13 @@ void Panel::DrawBoxFade(int x, int y, int wide, int tall, Color color, float nor
 	else
 	{
 		// draw the background in the areas not occupied by the corners
-		// draw it in three horizontal strips
+		// draw it in three vertical strips
+#ifdef VGUI_ENHANCEMENTS
+		// lazy
+		if ( GetRoundedCorners() == 0 )
+			cornerTall = cornerWide = 0;
+#endif
+
 		surface()->DrawSetColor(color);
 		surface()->DrawFilledRectFade(x, y + cornerTall, x + cornerWide, y + tall - cornerTall, alpha0, alpha0, bHorizontal );
 		if ( !hollow )
@@ -6636,33 +6851,59 @@ void Panel::DrawBoxFade(int x, int y, int wide, int tall, Color color, float nor
 	{
 		color[ 3 ] = iAlpha0;
 		surface()->DrawSetColor( color );
-		surface()->DrawSetTexture(m_nBgTextureId1);
-		surface()->DrawTexturedRect(x, y, x + cornerWide, y + cornerTall);
-		surface()->DrawSetTexture(m_nBgTextureId2);
-		surface()->DrawTexturedRect(x + wide - cornerWide, y, x + wide, y + cornerTall);
+		if ( ShouldDrawTopLeftCornerRounded() )
+		{
+			surface()->DrawSetTexture( m_nBgTextureId1 );
+			surface()->DrawTexturedRect( x, y, x + cornerWide, y + cornerTall );
+		}
+
+		if ( ShouldDrawTopRightCornerRounded() )
+		{
+			surface()->DrawSetTexture( m_nBgTextureId2 );
+			surface()->DrawTexturedRect( x + wide - cornerWide, y, x + wide, y + cornerTall );
+		}
 
 		color[ 3 ] = iAlpha1;
 		surface()->DrawSetColor( color );
-		surface()->DrawSetTexture(m_nBgTextureId3);
-		surface()->DrawTexturedRect(x + wide - cornerWide, y + tall - cornerTall, x + wide, y + tall);
-		surface()->DrawSetTexture(m_nBgTextureId4);
-		surface()->DrawTexturedRect(x + 0, y + tall - cornerTall, x + cornerWide, y + tall);
+		if ( ShouldDrawBottomRightCornerRounded() )
+		{
+			surface()->DrawSetTexture( m_nBgTextureId3 );
+			surface()->DrawTexturedRect( x + wide - cornerWide, y + tall - cornerTall, x + wide, y + tall );
+		}
+		if ( ShouldDrawBottomLeftCornerRounded() )
+		{
+			surface()->DrawSetTexture( m_nBgTextureId4 );
+			surface()->DrawTexturedRect( x + 0, y + tall - cornerTall, x + cornerWide, y + tall );
+		}
 	}
 	else
 	{
 		color[ 3 ] = iAlpha0;
 		surface()->DrawSetColor( color );
-		surface()->DrawSetTexture(m_nBgTextureId1);
-		surface()->DrawTexturedRect(x, y, x + cornerWide, y + cornerTall);
-		surface()->DrawSetTexture(m_nBgTextureId4);
-		surface()->DrawTexturedRect(x + 0, y + tall - cornerTall, x + cornerWide, y + tall);
+		if ( ShouldDrawTopLeftCornerRounded() )
+		{
+			surface()->DrawSetTexture( m_nBgTextureId1 );
+			surface()->DrawTexturedRect( x, y, x + cornerWide, y + cornerTall );
+		}
+		if ( ShouldDrawBottomLeftCornerRounded() )
+		{
+			surface()->DrawSetTexture( m_nBgTextureId4 );
+			surface()->DrawTexturedRect( x + 0, y + tall - cornerTall, x + cornerWide, y + tall );
+		}
 
 		color[ 3 ] = iAlpha1;
 		surface()->DrawSetColor( color );
-		surface()->DrawSetTexture(m_nBgTextureId2);
-		surface()->DrawTexturedRect(x + wide - cornerWide, y, x + wide, y + cornerTall);
-		surface()->DrawSetTexture(m_nBgTextureId3);
-		surface()->DrawTexturedRect(x + wide - cornerWide, y + tall - cornerTall, x + wide, y + tall);
+		if ( ShouldDrawTopRightCornerRounded() )
+		{
+			surface()->DrawSetTexture( m_nBgTextureId2 );
+			surface()->DrawTexturedRect( x + wide - cornerWide, y, x + wide, y + cornerTall );
+		}
+
+		if ( ShouldDrawBottomRightCornerRounded() )
+		{
+			surface()->DrawSetTexture( m_nBgTextureId3 );
+			surface()->DrawTexturedRect( x + wide - cornerWide, y + tall - cornerTall, x + wide, y + tall );
+		}
 	}
 }
 
@@ -6971,7 +7212,7 @@ void Panel::OnFinishDragging( bool mousereleased, MouseCode code, bool abort /*=
 		Q_strncpy( cmd, "default", sizeof( cmd ) );
 
 		if ( mousereleased &&
-			m_pDragDrop->m_hCurrentDrop != false &&
+			m_pDragDrop->m_hCurrentDrop.Get() != 0 &&
 			m_pDragDrop->m_hDropContextMenu.Get() )
 		{
 			Menu *menu = m_pDragDrop->m_hDropContextMenu;
@@ -7230,7 +7471,7 @@ void Panel::OnContinueDragging()
 		}
 	}
 
-	if ( m_pDragDrop->m_hCurrentDrop &&
+	if ( m_pDragDrop->m_hCurrentDrop.Get() != 0 &&
 		m_pDragDrop->m_hDropContextMenu.Get() )
 	{
 		Menu *menu = m_pDragDrop->m_hDropContextMenu;

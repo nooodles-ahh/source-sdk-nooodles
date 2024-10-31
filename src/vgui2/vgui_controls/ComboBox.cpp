@@ -40,10 +40,14 @@ void ComboBoxButton::ApplySchemeSettings(IScheme *pScheme)
 	
 	SetFont(pScheme->GetFont("Marlett", IsProportional()));
 	SetContentAlignment(Label::a_west);
+#ifdef VGUI_ENHANCEMENTS
+	SetTextInset( PROPORTIONAL_VALUE( 3 ), 0 );
+#else
 #ifdef OSX
 	SetTextInset(-3, 0);
 #else
 	SetTextInset(3, 0);
+#endif
 #endif
 	SetDefaultBorder(pScheme->GetBorder("ScrollBarButtonBorder"));
 	
@@ -464,7 +468,11 @@ void ComboBox::OnMousePressed(MouseCode code)
 		return;
 
 	// make sure it's getting pressed over us (it may not be due to mouse capture)
+#ifdef VGUI_ENHANCEMENTS
+	if ( !IsMouseInputDisabledForThisPanel() && !IsCursorOver() )
+#else
 	if ( !IsCursorOver() )
+#endif
 	{
 		HideMenu();
 		return;
@@ -488,6 +496,10 @@ void ComboBox::OnMousePressed(MouseCode code)
 //-----------------------------------------------------------------------------
 void ComboBox::OnMouseDoublePressed(MouseCode code)
 {
+#ifdef VGUI_ENHANCEMENTS
+	if(!IsEditable())
+		DoClick();
+#else
     if (IsEditable())
     {
         BaseClass::OnMouseDoublePressed(code);
@@ -496,6 +508,7 @@ void ComboBox::OnMouseDoublePressed(MouseCode code)
     {
 	    OnMousePressed(code);
     }
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -566,8 +579,14 @@ void ComboBox::HideMenu(void)
 	if ( !m_pDropDown )
 		return;
 
-	// hide the menu
+#ifdef VGUI_ENHANCEMENTS
 	m_pDropDown->SetVisible(false);
+	PostActionSignal( new KeyValues( "MenuClosed" ) );
+#else
+	m_pDropDown->SetVisible(false);
+#endif
+
+	// hide the menu
 	Repaint();
 	OnHideMenu(m_pDropDown);
 }
@@ -581,7 +600,7 @@ void ComboBox::ShowMenu(void)
 		return;
 
 	// hide the menu
-	m_pDropDown->SetVisible(false);
+	//m_pDropDown->SetVisible(false);
 	DoClick();
 }
 
@@ -674,19 +693,23 @@ void ComboBox::DoClick()
 	// reset the dropdown's position
 	DoMenuLayout();
 
-
 	// make sure we're at the top of the draw order (and therefore our children as well)
 	// this important to make sure the menu will be drawn in the foreground
 	MoveToFront();
 
+#ifndef VGUI_ENHANCEMENTS
 	// !KLUDGE! Force alpha to solid.  Otherwise,
 	// we run into weird VGUI problems with pops
 	// and the stencil test
 	Color c = m_pDropDown->GetBgColor();
 	c[3] = 255;
 	m_pDropDown->SetBgColor( c );
+#endif
 
 	// notify
+#ifdef VGUI_ENHANCEMENTS
+	PostActionSignal( new KeyValues( "MenuShown" ) );
+#endif
 	OnShowMenu(m_pDropDown);
 
 	// show the menu
@@ -827,7 +850,7 @@ void ComboBox::OnSetFocus()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-#ifdef _X360
+#if defined(_X360) || defined(VGUI_ENHANCEMENTS)
 void ComboBox::OnKeyCodePressed(KeyCode code)
 {
 	switch ( GetBaseButtonCode( code ) )

@@ -17,6 +17,7 @@ $Group "gamedlls"
 $Group "game"
 {
 	"client"
+	"gameui"
 	"mathlib"
 	"raytrace"
 	"server"

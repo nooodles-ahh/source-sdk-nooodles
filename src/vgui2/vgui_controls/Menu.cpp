@@ -76,14 +76,7 @@ Menu::Menu(Panel *parent, const char *panelName) : Panel(parent, panelName)
 	m_bUseFallbackFont = false;
 	m_hFallbackItemFont = INVALID_FONT;
 
-	if (IsProportional())
-	{
-		m_iMenuItemHeight =  scheme()->GetProportionalScaledValueEx( GetScheme(), DEFAULT_MENU_ITEM_HEIGHT );
-	}
-	else
-	{
-		m_iMenuItemHeight =  DEFAULT_MENU_ITEM_HEIGHT;
-	}
+	m_iMenuItemHeight =  PROPORTIONAL_VALUE( DEFAULT_MENU_ITEM_HEIGHT );
 	m_hItemFont = INVALID_FONT;
 
 
@@ -1880,6 +1873,9 @@ void Menu::ApplySchemeSettings(IScheme *pScheme)
 	SetBgColor(GetSchemeColor("Menu.BgColor", pScheme));
 
 	_borderDark = pScheme->GetColor("BorderDark", Color(255, 255, 255, 0));
+#ifdef VGUI_ENHANCEMENTS
+	m_iMenuItemHeight = IsProportional() ? scheme()->GetProportionalScaledValueEx( GetScheme(), DEFAULT_MENU_ITEM_HEIGHT ) : DEFAULT_MENU_ITEM_HEIGHT;
+#endif
 
 	FOR_EACH_LL( m_MenuItems, i )
 	{
@@ -1892,7 +1888,9 @@ void Menu::ApplySchemeSettings(IScheme *pScheme)
 		}
 	}
 	_recalculateWidth = true;
+#ifndef VGUI_ENHANCEMENTS
 	CalculateWidth();
+#endif
 
 	InvalidateLayout();
 }

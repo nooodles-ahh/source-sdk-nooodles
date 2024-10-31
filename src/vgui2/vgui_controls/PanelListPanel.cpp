@@ -361,6 +361,18 @@ void PanelListPanel::ApplySchemeSettings(IScheme *pScheme)
 	SetBgColor(GetSchemeColor("ListPanel.BgColor", GetBgColor(), pScheme));
 }
 
+#ifdef VGUI_ENHANCEMENTS
+void PanelListPanel::ApplySettings( KeyValues* pInResourceData )
+{
+	BaseClass::ApplySettings( pInResourceData );
+	KeyValues *pKVScrollBar = pInResourceData->FindKey( "ScrollBar" );
+	if ( pKVScrollBar )
+	{
+		m_vbar->ApplySettings( pKVScrollBar );
+	}
+}
+#endif
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -409,8 +421,13 @@ int PanelListPanel::GetNumColumns( void )
 //-----------------------------------------------------------------------------
 void PanelListPanel::OnMouseWheeled(int delta)
 {
-	int val = m_vbar->GetValue();
+	int val = m_vbar->GetDesiredValue();
+#ifdef VGUI_ENHANCEMENTS
+	// double potency of mouse wheel
+	val -= (delta * m_iDefaultHeight ) * 2;
+#else
 	val -= (delta * DEFAULT_HEIGHT);
+#endif
 	m_vbar->SetValue(val);	
 }
 

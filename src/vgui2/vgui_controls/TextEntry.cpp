@@ -1442,10 +1442,10 @@ void TextEntry::OnCursorMoved(int x, int y)
 	if (_mouseSelection)
 	{
 		// update the cursor position
-		int cx, cy;
-		input()->GetCursorPos(cx, cy);
-		ScreenToLocal(cx, cy);
-		_cursorPos = PixelToCursorSpace(cx, cy);
+		int x, y;
+		input()->GetCursorPos(x, y);
+		ScreenToLocal(x, y);
+		_cursorPos = PixelToCursorSpace(x, y);
 		
 		// if we are at Start of buffer don't put cursor at end, this will keep
 		// window from scrolling up to a blank line
@@ -3798,6 +3798,11 @@ void TextEntry::SetToFullHeight()
 //-----------------------------------------------------------------------------
 void TextEntry::SelectAllText( bool bResetCursorPos )
 {
+#ifdef VGUI_ENHANCEMENTS
+	if ( !IsEditable() )
+		return;
+#endif
+
 	// if there's no text at all, select none
 	if ( m_TextStream.Count() == 0 )
 	{

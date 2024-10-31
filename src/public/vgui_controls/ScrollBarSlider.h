@@ -31,8 +31,15 @@ public:
 	ScrollBarSlider(Panel *parent, const char *panelName, bool vertical);
 
 	// Set the ScrollBarSlider value of the nob.
-	virtual void SetValue(int value); 
+	virtual void SetValue(int value);
 	virtual int  GetValue();
+#ifdef VGUI_ENHANCEMENTS
+	virtual int GetDesiredValue();
+	void SetSmoothScrolling(bool bSmoothScrolling)
+	{
+		_bSmoothScrolling = bSmoothScrolling;
+	}
+#endif
 
 	// Check whether the scroll bar is vertical or not
 	virtual bool IsVertical();
@@ -71,6 +78,10 @@ protected:
 	virtual void PaintBackground();
 	virtual void PerformLayout();
 	virtual void ApplySchemeSettings(IScheme *pScheme);
+#ifdef VGUI_ENHANCEMENTS
+	virtual void OnThink();
+	virtual void PaintBorder();
+#endif
 
 private:
 	virtual void RecomputeNobPosFromValue();
@@ -83,10 +94,18 @@ private:
 	int _nobDragStartPos[2];
 	int _dragStartPos[2];
 	int _range[2];
+#ifndef VGUI_ENHANCEMENTS
 	int _value;		// the position of the ScrollBarSlider, in coordinates as specified by SetRange/SetRangeWindow
+#endif
 	int _rangeWindow;
 	int _buttonOffset;
+#ifndef VGUI_ENHANCEMENTS
 	IBorder *_ScrollBarSliderBorder;
+#else // VGUI_ENHANCEMENTS
+	int _desiredValue;
+	CPanelAnimationVar( float, _value, "_value", "0" );
+	bool	_bSmoothScrolling;
+#endif
 };
 
 } // namespace vgui

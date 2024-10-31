@@ -158,4 +158,11 @@ class TextImage;
 	extern className *g_##factoryName##LinkerHack;		\
 	className *g_##factoryName##PullInModule = g_##factoryName##LinkerHack;
 
+#ifdef VGUI_ENHANCEMENTS
+#define PROPORTIONAL_VALUE(x) \
+	(IsProportional() ? vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), x ) : x)
+#else
+#define PROPORTIONAL_VALUE(x) x
+#endif
+
 #endif // CONTROLS_H

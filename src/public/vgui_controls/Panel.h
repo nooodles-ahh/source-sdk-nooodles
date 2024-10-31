@@ -28,6 +28,9 @@
 #include "vstdlib/IKeyValuesSystem.h"
 #include "tier1/utlsymbol.h"
 #include "vgui_controls/BuildGroup.h"
+#ifdef VGUI_ENHANCEMENTS
+#include "KeyValues.h"
+#endif
 
 // undefine windows function macros that overlap 
 #ifdef PostMessage
@@ -39,6 +42,9 @@
 #endif
 
 class CUtlBuffer;
+#ifdef VGUI_ENHANCEMENTS
+class MessageHandler;
+#endif
 
 namespace vgui
 {
@@ -623,6 +629,11 @@ public:
 	template< class S >
 	void		PostMessageToAllSiblingsOfType( KeyValues *msg, float delaySeconds = 0.0f );
 
+#ifdef VGUI_ENHANCEMENTS
+	template< class S >
+	void		PostMessageToAllChildrenOfType( KeyValues *msg, float delaySeconds = 0.0f );
+#endif
+
 	void		SetConsoleStylePanel( bool bConsoleStyle );
 	bool		IsConsoleStylePanel() const;
 
@@ -858,9 +869,13 @@ private:
 
 	CUtlVector<OverridableColorEntry>	m_OverridableColorEntries;
 
+#ifdef VGUI_ENHANCEMENTS
+	CPanelAnimationVarAliasType( Color, _fgColor, "fgcolor", "Panel.FgColor", "color" );
+	CPanelAnimationVarAliasType( Color, _bgColor, "bgcolor", "Panel.BgColor", "color" );
+#else
 	Color			_fgColor;		// foreground color
 	Color			_bgColor;		// background color
-
+#endif
 	HBuildGroup		_buildGroup;
 
 	short			m_nPinDeltaX;		// Relative position of the pinned corner to the edge
@@ -946,6 +961,9 @@ private:
 
 	// obselete, remove soon
 	void OnOldMessage(KeyValues *params, VPANEL ifromPanel);
+#ifdef VGUI_ENHANCEMENTS
+	friend class ::MessageHandler;
+#endif
 };
 
 inline void Panel::DisableMouseInputForThisPanel( bool bDisable )
@@ -958,7 +976,8 @@ inline bool	Panel::IsMouseInputDisabledForThisPanel() const
 	return _flags.IsFlagSet( IS_MOUSE_DISABLED_FOR_THIS_PANEL_ONLY );
 }
 
-#if 0
+#if 1
+//#if 0
 // This function cannot be defined here because it requires on a full definition of
 // KeyValues (to call KeyValues::MakeCopy()) whereas the rest of this header file
 // assumes a forward declared definition of KeyValues.
@@ -981,6 +1000,23 @@ inline void Panel::PostMessageToAllSiblingsOfType( KeyValues *msg, float delaySe
 		}
 	}
 
+	msg->deleteThis();
+}
+#endif
+
+#ifdef VGUI_ENHANCEMENTS
+template< class S >
+inline void Panel::PostMessageToAllChildrenOfType( KeyValues* msg, float delaySeconds /*= 0.0f*/ )
+{
+	int nChildCount = GetChildCount();
+	for ( int i = 0; i < nChildCount; ++i )
+	{
+		Panel* child = GetChild( i );
+		if ( dynamic_cast< S* >( child ) )
+		{
+			PostMessage( child->GetVPanel(), msg->MakeCopy(), delaySeconds );
+		}
+	}
 	msg->deleteThis();
 }
 #endif

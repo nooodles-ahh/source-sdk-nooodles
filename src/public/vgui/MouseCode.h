@@ -18,6 +18,18 @@
 namespace vgui
 {
 typedef ButtonCode_t MouseCode;
+
+#ifdef VGUI_ENHANCEMENTS
+static inline int MouseButtonBit(MouseCode code)
+{
+	if (code < MOUSE_FIRST || code > MOUSE_LAST) 
+	{
+		Assert(false);
+		return 0;
+	}
+	return 1 << (code - MOUSE_FIRST);
+}
+#endif
 }
 
 #endif // MOUSECODE_H

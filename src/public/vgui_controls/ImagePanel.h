@@ -62,6 +62,9 @@ public:
 	void SetFrame( int nFrame );
 
 	void SetRotation( int iRotation ) { m_iRotation = iRotation; }
+#ifdef VGUI_ENHANCEMENTS
+	MESSAGE_FUNC_PARAMS( OnSetText, "SetText", params );
+#endif
 
 protected:
 	virtual void PaintBackground();
@@ -69,6 +72,9 @@ protected:
 	virtual const char *GetDescription();
 	virtual void OnSizeChanged(int newWide, int newTall);
 	virtual void ApplySchemeSettings( IScheme *pScheme );
+#ifdef VGUI_ENHANCEMENTS
+	MESSAGE_FUNC_PARAMS( OnDialogVariablesChanged, "DialogVariables", dialogVariables );
+#endif
 
 private:
 	IImage *m_pImage;
@@ -85,6 +91,10 @@ private:
 	Color m_FillColor;
 	Color m_DrawColor;
 	int m_iRotation;
+#ifdef VGUI_ENHANCEMENTS
+	bool m_bIsTGA;
+	bool m_bWaitingForDialogVar;
+#endif
 };
 
 } // namespace vgui

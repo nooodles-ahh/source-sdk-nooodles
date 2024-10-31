@@ -90,18 +90,27 @@ void QueryBox::PerformLayout()
 	m_pCancelButton->GetSize(oldWide, oldTall);
 	
 	int btnWide, btnTall;
+	int padding = PROPORTIONAL_VALUE( 10 );
 	m_pCancelButton->GetContentSize(btnWide, btnTall);
-	btnWide = max(oldWide, btnWide + 10);
-	btnTall = max(oldTall, btnTall + 10);
+	btnWide = max(oldWide, btnWide + padding );
+	btnTall = max(oldTall, btnTall + padding );
 	m_pCancelButton->SetSize(btnWide, btnTall);
+
+#ifdef VGUI_ENHANCEMENTS
+	m_pOkButton->GetContentSize( btnWide, btnTall );
+	btnWide = max( oldWide, btnWide + padding );
+	btnTall = max( oldTall, btnTall + padding );
+	m_pOkButton->SetSize( btnWide, btnTall );
+#endif
 
 //nt boxWidth, boxTall;
 	GetSize(boxWidth, boxTall);
 //	wide = max(wide, btnWide * 2 + 100);
 //	SetSize(wide, tall);
 
-	m_pOkButton->SetPos((wide/2)-(m_pOkButton->GetWide())-1 + x, tall - m_pOkButton->GetTall() - 15);
-	m_pCancelButton->SetPos((wide/2) + x+16, tall - m_pCancelButton->GetTall() - 15);
+	padding = PROPORTIONAL_VALUE( 15 );
+	m_pOkButton->SetPos((wide/2)-(m_pOkButton->GetWide())-1 + x, tall - m_pOkButton->GetTall() - padding );
+	m_pCancelButton->SetPos((wide/2) + x+ PROPORTIONAL_VALUE( 16 ), tall - m_pCancelButton->GetTall() - padding );
 
 }
 

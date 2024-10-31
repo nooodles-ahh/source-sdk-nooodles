@@ -66,7 +66,11 @@ public:
 	void MoveScrollBarToTop();
 
 	// selection
+#ifdef VGUI_ENHANCEMENTS
+	MESSAGE_FUNC_PTR( SetSelectedPanel, "SelectPanel", panel );
+#else
 	void SetSelectedPanel( Panel *panel );
+#endif
 	Panel *GetSelectedPanel();
 	/*
 		On a panel being selected, a message gets sent to it
@@ -92,6 +96,9 @@ protected:
 	virtual void PerformLayout();
 	virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
 	virtual void OnMouseWheeled(int delta);
+#ifdef VGUI_ENHANCEMENTS
+	virtual void ApplySettings( KeyValues *pInResourceData );
+#endif
 
 private:
 	

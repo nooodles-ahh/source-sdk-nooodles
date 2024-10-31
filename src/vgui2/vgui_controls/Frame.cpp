@@ -1439,7 +1439,7 @@ void Frame::GetClientArea(int &x, int &y, int &wide, int &tall)
 		int captionTall = surface()->GetFontTall(_title->GetFont());
 
 		int border = m_bSmallCaption ? CAPTION_TITLE_BORDER_SMALL : CAPTION_TITLE_BORDER;
-		int yinset = m_bSmallCaption ? 0 : m_iClientInsetY;
+		int yinset = m_bSmallCaption ? 0 : PROPORTIONAL_VALUE(m_iClientInsetY);
 
 		yinset += m_iTitleTextInsetYOverride;
 
@@ -1607,15 +1607,15 @@ void Frame::PaintBackground()
 
 		// caption
 		surface()->DrawSetColor(titleColor);
-		int inset = m_bSmallCaption ? 3 : 5;
-		int captionHeight = m_bSmallCaption ? 14: 28;
+		int inset = PROPORTIONAL_VALUE( m_bSmallCaption ? 3 : 5 );
+		int captionHeight = PROPORTIONAL_VALUE( m_bSmallCaption ? 14: 28 );
 
 		surface()->DrawFilledRect(inset, inset, wide - inset, captionHeight );
 		
 		if (_title)
 		{
-			int nTitleX = m_iTitleTextInsetXOverride ? m_iTitleTextInsetXOverride : m_iTitleTextInsetX;
-			int nTitleWidth = wide - 72;
+			int nTitleX = m_iTitleTextInsetXOverride ? m_iTitleTextInsetXOverride : PROPORTIONAL_VALUE(m_iTitleTextInsetX);
+			int nTitleWidth = wide - PROPORTIONAL_VALUE(72);
 #if !defined( _X360 )
 			if ( _menuButton && _menuButton->IsVisible() )
 			{
@@ -1632,7 +1632,7 @@ void Frame::PaintBackground()
 			}
 			else
 			{
-				nTitleY = m_bSmallCaption ? 2 : 9;
+				nTitleY = PROPORTIONAL_VALUE(m_bSmallCaption ? 2 : 9);
 			}
 			_title->SetPos( nTitleX, nTitleY );		
 			_title->SetSize( nTitleWidth, tall);

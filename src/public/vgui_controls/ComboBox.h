@@ -147,7 +147,7 @@ protected:
 	// custom message handlers
 	MESSAGE_FUNC_WCHARPTR( OnSetText, "SetText", text );
 	virtual void OnSetFocus();						// called after the panel receives the keyboard focus
-#ifdef _X360
+#if defined(_X360) || defined(VGUI_ENHANCEMENTS)
 	virtual void OnKeyCodePressed(KeyCode code);
 #endif
     virtual void OnKeyCodeTyped(KeyCode code);

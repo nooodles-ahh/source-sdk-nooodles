@@ -180,14 +180,22 @@ void Slider::RecomputeNobPosFromValue()
 	float firstpixel = leftpixel + freepixels * fper + 0.5f;
 
 	_nobPos[0]=(int)( firstpixel );
+#ifdef VGUI_ENHANCEMENTS
+	_nobPos[1]=(int)( firstpixel + PROPORTIONAL_VALUE(_nobSize) );
+#else
 	_nobPos[1]=(int)( firstpixel + _nobSize );
+#endif
 
 
 	int rightEdge = x + wide;
 
 	if(_nobPos[1]> rightEdge )
 	{
+	#ifdef VGUI_ENHANCEMENTS
+		_nobPos[0]=rightEdge - PROPORTIONAL_VALUE(_nobSize);
+	#else
 		_nobPos[0]=rightEdge-((int)_nobSize);
+	#endif
 		_nobPos[1]=rightEdge;
 	}
 	
@@ -279,7 +287,7 @@ void Slider::ApplySchemeSettings(IScheme *pScheme)
 	m_TickColor = pScheme->GetColor( "Slider.TextColor", GetFgColor() );
 	m_TrackColor = pScheme->GetColor( "Slider.TrackColor", GetFgColor() );
 
-#ifdef _X360
+#if defined(_X360) || defined(VGUI_ENHANCEMENTS)
 	m_DepressedBgColor = GetSchemeColor("Slider.NobFocusColor", pScheme);
 #endif
 
@@ -385,10 +393,17 @@ void Slider::GetTrackRect( int& x, int& y, int& w, int& h )
 	int wide, tall;
 	GetPaintSize( wide, tall );
 
+#ifdef VGUI_ENHANCEMENTS
+	x = 0;
+	y = PROPORTIONAL_VALUE(8);
+	w = wide - (int)_nobSize;
+	h = PROPORTIONAL_VALUE( 4 );
+#else
 	x = 0;
 	y = 8;
 	w = wide - (int)_nobSize;
 	h = 4;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -464,7 +479,11 @@ void Slider::DrawTickLabels()
 
 	// Figure out how to draw the ticks
 //	GetPaintSize( wide, tall );
+#ifdef VGUI_ENHANCEMENTS
+	y += PROPORTIONAL_VALUE( NOB_SIZE + 4 );
+#else
 	y += (int)NOB_SIZE + 4;
+#endif
 
 	// Draw Start and end range values
     if (IsEnabled())
@@ -516,7 +535,7 @@ void Slider::DrawNob()
 	int wide,tall;
 	GetTrackRect( x, y, wide, tall );
 	Color col = GetFgColor();
-#ifdef _X360
+#if defined(_X360) || defined(VGUI_ENHANCEMENTS)
 	if(HasFocus())
 	{
 		col = m_DepressedBgColor;
@@ -524,20 +543,24 @@ void Slider::DrawNob()
 #endif
 	surface()->DrawSetColor(col);
 
+#ifdef VGUI_ENHANCEMENTS
+	int nobheight = PROPORTIONAL_VALUE(16);
+#else
 	int nobheight = 16;
+#endif
 
 	surface()->DrawFilledRect(
-		_nobPos[0], 
+		_nobPos[0],
 		y + tall / 2 - nobheight / 2, 
-		_nobPos[1], 
+		_nobPos[1],
 		y + tall / 2 + nobheight / 2);
 	// border
 	if (_sliderBorder)
 	{
 		_sliderBorder->Paint(
-			_nobPos[0], 
+			_nobPos[0],
 			y + tall / 2 - nobheight / 2, 
-			_nobPos[1], 
+			_nobPos[1],
 			y + tall / 2 + nobheight / 2);
 	}
 }
@@ -821,7 +844,7 @@ void Slider::OnMouseDoublePressed(MouseCode code)
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
-#ifdef _X360
+#if defined(_X360) || defined(VGUI_ENHANCEMENTS)
 void Slider::OnKeyCodePressed(KeyCode code)
 {
 	switch ( GetBaseButtonCode( code ) )

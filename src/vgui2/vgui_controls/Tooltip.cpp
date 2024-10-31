@@ -6,8 +6,8 @@
 // and implement another button here.
 //=============================================================================//
 
-#include <math.h>
-#define PROTECTED_THINGS_DISABLE
+//#include <math.h>
+//#define PROTECTED_THINGS_DISABLE
 
 #include <vgui/IInput.h>
 #include <vgui/ISystem.h>
@@ -44,7 +44,7 @@ BaseTooltip::BaseTooltip(Panel *parent, const char *text)
 	_isDirty = false;
 	_enabled = true;
 
-	_tooltipDelay = 500; // default delay for opening tooltips
+	_tooltipDelay = 1500; // default delay for opening tooltips
 	_delay = 0;
 }
 
@@ -225,6 +225,10 @@ TextTooltip::TextTooltip(Panel *parent, const char *text) : BaseTooltip( parent,
 	if (!s_TooltipWindow.Get())
 	{
 		s_TooltipWindow = new TextEntry(NULL, "tooltip");
+	#ifdef VGUI_ENHANCEMENTS
+		// Set proportional based on parent panel
+		s_TooltipWindow->SetProportional(parent ? parent->IsProportional() : false);
+	#endif
 
  		s_TooltipWindow->InvalidateLayout(false, true);
 
@@ -324,6 +328,7 @@ void TextTooltip::PerformLayout()
 {
 	if ( !ShouldLayout() )
 		return;
+		
 	// we're ready, just make us visible
 	if ( !s_TooltipWindow.Get() )
 		return;

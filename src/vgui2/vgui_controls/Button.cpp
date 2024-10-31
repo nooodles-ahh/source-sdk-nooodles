@@ -242,6 +242,10 @@ bool Button::IsArmed()
 
 KeyValues *Button::GetActionMessage()
 {
+#ifdef VGUI_ENHANCEMENTS
+	if ( !_actionMessage )
+		return nullptr;
+#endif
 	return _actionMessage->MakeCopy();
 }
 
@@ -695,12 +699,20 @@ void Button::SetMouseClickEnabled(MouseCode code,bool state)
 	if(state)
 	{
 		//set bit to 1
+	#if VGUI_ENHANCEMENTS
+		_mouseClickMask|=MouseButtonBit(code);
+	#else
 		_mouseClickMask|=1<<((int)(code+1));
+	#endif
 	}
 	else
 	{
 		//set bit to 0
+	#if VGUI_ENHANCEMENTS
+		_mouseClickMask&=~MouseButtonBit(code);
+	#else
 		_mouseClickMask&=~(1<<((int)(code+1)));
+	#endif
 	}	
 }
 
@@ -709,7 +721,11 @@ void Button::SetMouseClickEnabled(MouseCode code,bool state)
 //-----------------------------------------------------------------------------
 bool Button::IsMouseClickEnabled(MouseCode code)
 {
+#if VGUI_ENHANCEMENTS
+	if(_mouseClickMask&MouseButtonBit(code))
+#else
 	if(_mouseClickMask&(1<<((int)(code+1))))
+#endif
 	{
 		return true;
 	}
@@ -906,6 +922,10 @@ void Button::OnCursorEntered()
 	{
 		SetArmed( true );
 	}
+
+#ifdef VGUI_ENHANCEMENTS
+	RecalculateDepressedState();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -913,10 +933,18 @@ void Button::OnCursorEntered()
 //-----------------------------------------------------------------------------
 void Button::OnCursorExited()
 {
+#ifdef VGUI_ENHANCEMENTS
+	if ( !IsSelected() )
+#else
 	if ( !_buttonFlags.IsFlagSet( BUTTON_KEY_DOWN ) && !IsSelected() )
+#endif
 	{
 		SetArmed( false );
 	}
+
+#ifdef VGUI_ENHANCEMENTS
+	RecalculateDepressedState();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -960,6 +988,15 @@ void Button::OnMousePressed(MouseCode code)
 		// lock mouse input to going to this button
 		input()->SetMouseCapture(GetVPanel());
 	}
+
+#ifdef VGUI_ENHANCEMENTS
+	if ( _activationType == ACTIVATE_ONRELEASED )
+	{
+		SetArmed( true );
+		SetSelected( true );
+	}
+	RecalculateDepressedState();
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -999,6 +1036,10 @@ void Button::OnMouseReleased(MouseCode code)
 	{
 		SetSelected(false);
 	}
+
+#ifdef VGUI_ENHANCEMENTS
+	RecalculateDepressedState();
+#endif
 
 	// make sure the button gets unselected
 	Repaint();

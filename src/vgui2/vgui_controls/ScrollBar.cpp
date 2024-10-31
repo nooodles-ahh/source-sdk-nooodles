@@ -158,7 +158,14 @@ ScrollBar::ScrollBar(Panel *parent, const char *panelName, bool vertical) : Pane
 		_button[0]->SetTextInset(0, 1);
 		_button[1]->SetTextInset(0, -1);
 
+#ifdef VGUI_ENHANCEMENTS
+		SetSize(
+			PROPORTIONAL_VALUE( SCROLLBAR_DEFAULT_WIDTH ),
+			PROPORTIONAL_VALUE( 64 )
+		);
+#else
 		SetSize(SCROLLBAR_DEFAULT_WIDTH, 64);
+#endif
 	}
 	else
 	{
@@ -168,7 +175,14 @@ ScrollBar::ScrollBar(Panel *parent, const char *panelName, bool vertical) : Pane
 		_button[0]->SetTextInset(0, 0);
 		_button[1]->SetTextInset(0, 0);
 
+#ifdef VGUI_ENHANCEMENTS
+		SetSize(
+			PROPORTIONAL_VALUE( 64 ),
+			PROPORTIONAL_VALUE( SCROLLBAR_DEFAULT_WIDTH )
+		);
+#else
 		SetSize(64, SCROLLBAR_DEFAULT_WIDTH);
+#endif
 	}
 
 	Panel::SetPaintBorderEnabled(true);
@@ -334,6 +348,16 @@ int ScrollBar::GetValue()
 {
 	return _slider->GetValue();
 }
+
+#ifdef VGUI_ENHANCEMENTS
+//-----------------------------------------------------------------------------
+// Purpose: Get the real value of the scroll bar slider.
+//-----------------------------------------------------------------------------
+int ScrollBar::GetDesiredValue()
+{
+	return _slider->GetDesiredValue();
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Set the range of the scroll bar slider.

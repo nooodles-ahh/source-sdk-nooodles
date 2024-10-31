@@ -508,6 +508,11 @@ void FileOpenDialog::Init( const char *title, KeyValues *pContextKeyValues )
 	m_bFileSelected = false;
 	SetTitle(title, true);
 	SetMinimizeButtonVisible(false);
+
+#ifdef VGUI_ENHANCEMENTS
+	// I'm too lazy to fix this right now
+	SetProportional( false );
+#endif
 	
 #ifdef POSIX
 	Q_strncpy(m_szLastPath, "/", sizeof( m_szLastPath ) );	

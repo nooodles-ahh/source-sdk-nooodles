@@ -38,6 +38,10 @@ public:
 	// Get the value of the scroll bar slider.
 	virtual int     GetValue();
 
+#ifdef VGUI_ENHANCEMENTS
+	virtual int     GetDesiredValue();
+#endif
+
 	// Set the rangeof numbers the slider can scroll through
 	virtual void    SetRange(int min,int max);
 

@@ -564,21 +564,22 @@ public:
 					image = GetImageAtIndex(i);
 				}
 
-				int imageWide = 0, tall_ = 0, wide_ = 0;
+				int imageWide = 0, tall = 0;
+				int wide;
 				if (image)
 				{
-					image->GetContentSize(imageWide, tall_);
+					image->GetContentSize(imageWide, tall);
 				}
 				if (maxWidth >= 0)
 				{
-					wide_ = maxWidth;
+					wide = maxWidth;
 				}
 				else
 				{
-					wide_ = imageWide;
+					wide = imageWide;
 				}
 
-				xpos += wide_;//max(maxWidth,wide);
+				xpos += wide;//max(maxWidth,wide);
 				surface()->DrawOutlinedRect( xpos, 0, xpos, GetTall() );
 			}
 		}
@@ -900,8 +901,14 @@ void SectionedListPanel::PerformLayout()
 void SectionedListPanel::LayoutPanels(int &contentTall)
 {
 	int tall = GetSectionTall();
+#ifdef VGUI_ENHANCEMENTS
+	int x = PROPORTIONAL_VALUE(5);
+	int wide = GetWide() - PROPORTIONAL_VALUE(10);
+	int y = PROPORTIONAL_VALUE(5);
+#else
 	int x = 5, wide = GetWide() - 10;
 	int y = 5;
+#endif
 	
 	if (m_pScrollBar->IsVisible())
 	{
@@ -1116,6 +1123,14 @@ void SectionedListPanel::ApplySettings(KeyValues *inResourceData)
 	{
 		m_iSectionGap = scheme()->GetProportionalScaledValueEx(GetScheme(), m_iSectionGap);
 	}
+
+#ifdef VGUI_ENHANCEMENTS
+	KeyValues* pKVScrollBar = inResourceData->FindKey("ScrollBar");
+	if (pKVScrollBar)
+	{
+		m_pScrollBar->ApplySettings(pKVScrollBar);
+	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1542,8 +1557,13 @@ void SectionedListPanel::OnMouseWheeled(int delta)
 	}
 
 	// scroll the window based on the delta
+#ifdef VGUI_ENHANCEMENTS
+	int val = m_pScrollBar->GetDesiredValue();
+	val -= (delta * PROPORTIONAL_VALUE(BUTTON_HEIGHT_DEFAULT) * 2);
+#else
 	int val = m_pScrollBar->GetValue();
 	val -= (delta * BUTTON_HEIGHT_DEFAULT * 3);
+#endif
 	m_pScrollBar->SetValue(val);
 }
 
@@ -2094,11 +2114,18 @@ int SectionedListPanel::GetSectionTall()
 		HFont font = m_Sections[0].m_pHeader->GetFont();
 		if (font != INVALID_FONT)
 		{
+#ifdef VGUI_ENHANCEMENTS
+			return surface()->GetFontTall(font) + PROPORTIONAL_VALUE(BUTTON_HEIGHT_SPACER);
+#else
 			return surface()->GetFontTall(font) + BUTTON_HEIGHT_SPACER;
+#endif
 		}
 	}
-
+#ifdef VGUI_ENHANCEMENTS
+	return PROPORTIONAL_VALUE(BUTTON_HEIGHT_DEFAULT);
+#else
 	return BUTTON_HEIGHT_DEFAULT;
+#endif
 }
 
 //-----------------------------------------------------------------------------

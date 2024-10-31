@@ -117,22 +117,25 @@ void PropertyDialog::PerformLayout()
 
 
 	// move the buttons to the bottom-right corner
-	int xpos = x + wide - 80;
-	int ypos = tall + y - 28;
+	int xpos = x + wide - PROPORTIONAL_VALUE(80);
+	int ypos = tall + y - PROPORTIONAL_VALUE(28);
+
+	wide = PROPORTIONAL_VALUE( 72 );
+	tall = PROPORTIONAL_VALUE( 24 );
 
 	if (_applyButton->IsVisible())
 	{
-		_applyButton->SetBounds(xpos, ypos, 72, 24);
-		xpos -= 80;
+		_applyButton->SetBounds(xpos, ypos, wide, tall );
+		xpos -= PROPORTIONAL_VALUE(80);
 	}
 
 	if (_cancelButton->IsVisible())
 	{
-		_cancelButton->SetBounds(xpos, ypos, 72, 24);
-		xpos -= 80;
+		_cancelButton->SetBounds(xpos, ypos, wide, tall );
+		xpos -= PROPORTIONAL_VALUE(80);
 	}
 
-	_okButton->SetBounds(xpos, ypos, 72, 24);
+	_okButton->SetBounds(xpos, ypos, wide, tall );
 
 	_propertySheet->InvalidateLayout(); // tell the propertysheet to redraw!
 	Repaint();

@@ -841,12 +841,12 @@ void CConsolePanel::PerformLayout()
 
 	if ( !m_bStatusVersion )
 	{
-		const int inset = 8;
-		const int entryHeight = 24;
-		const int topHeight = 4;
-		const int entryInset = 4;
-		const int submitWide = 64;
-		const int submitInset = 7; // x inset to pull the submit button away from the frame grab
+		const int inset = PROPORTIONAL_VALUE(8);
+		const int entryHeight = PROPORTIONAL_VALUE( 24 );
+		const int topHeight = PROPORTIONAL_VALUE( 4 );
+		const int entryInset = PROPORTIONAL_VALUE( 4 );
+		const int submitWide = PROPORTIONAL_VALUE( 64 );
+		const int submitInset = PROPORTIONAL_VALUE( 7 ); // x inset to pull the submit button away from the frame grab
 
 		m_pHistory->SetPos(inset, inset + topHeight); 
 		m_pHistory->SetSize(wide - (inset * 2), tall - (entryInset * 2 + inset * 2 + topHeight + entryHeight));
@@ -1130,6 +1130,10 @@ void CConsolePanel::DumpConsoleTextToFile()
 CConsoleDialog::CConsoleDialog( vgui::Panel *pParent, const char *pName, bool bStatusVersion ) : 
 	BaseClass( pParent, pName )
 {
+#ifdef VGUI_ENHANCEMENTS
+	SetProportional( false );
+#endif
+
 	// initialize dialog
 	SetVisible( false );
 	SetTitle( "#Console_Title", true );
