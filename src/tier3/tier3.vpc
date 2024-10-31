@@ -22,7 +22,10 @@ $Project "tier3"
 {
 	$Folder "Source Files"
 	{
-		$File	"tier3.cpp"
+		$File	"tier3.cpp" \
+				"choreoutils.cpp" \
+				"mdlutils.cpp" \
+				"studiohdrstub.cpp"
 	}
 	
 	$Folder "Public Header Files"
