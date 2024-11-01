@@ -1357,18 +1357,23 @@ void COptionsSubVideo::OpenThirdPartyVideoCreditsDialog()
 {
    if (!m_OptionsSubVideoThirdPartyCreditsDlg.Get())
    {
-      m_OptionsSubVideoThirdPartyCreditsDlg = new COptionsSubVideoThirdPartyCreditsDlg(GetVParent());
+      m_OptionsSubVideoThirdPartyCreditsDlg = new COptionsSubVideoThirdPartyCreditsDlg(this);
    }
    m_OptionsSubVideoThirdPartyCreditsDlg->Activate();
 }
 
-COptionsSubVideoThirdPartyCreditsDlg::COptionsSubVideoThirdPartyCreditsDlg( vgui::VPANEL hParent ) : BaseClass( NULL, NULL )
+COptionsSubVideoThirdPartyCreditsDlg::COptionsSubVideoThirdPartyCreditsDlg( vgui::Panel* pParent ) : BaseClass( NULL, NULL )
 {
-	SetProportional( true );
+	if (pParent)
+	{
+		SetProportional(pParent->IsProportional());
+		SetScheme(pParent->GetScheme());
+	}
+
 	SetTitle("#GameUI_ThirdPartyVideo_Title", true);
-	SetSize(
-		vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), 500 ),
-		vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), 200 )
+	SetSize( 
+		PROPORTIONAL_VALUE( 500 ),
+		PROPORTIONAL_VALUE( 200 )
 	);
 
 	MoveToCenterOfScreen();

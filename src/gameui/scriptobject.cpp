@@ -60,7 +60,8 @@ objtypedesc_t objtypes[] =
 		{ O_STRING, "STRING" },
 		{ O_CATEGORY, "CATEGORY" },
 		{ O_OBSOLETE, "OBSOLETE" },
-};
+		{ O_DIVIDER, "DIVIDER" },
+	};
 
 mpcontrol_t::mpcontrol_t( Panel *parent, char const *panelName )
 	: Panel( parent, panelName )
@@ -94,6 +95,10 @@ void mpcontrol_t::OnSizeChanged( int wide, int tall )
 		if ( pControl )
 		{
 			pControl->SetBounds( 0, inset, wide, tall - 2 * inset );
+			if ( type == O_DIVIDER )
+			{
+				pControl->SetBounds( 0, inset, wide, ( tall / 2.f ) - inset );
+			}
 		}
 	}
 }
@@ -190,7 +195,7 @@ void UTIL_StripInvalidCharacters( char *pszInput, int maxlen )
 {
 	char szOutput[4096];
 	char *pIn, *pOut;
-	
+
 	pIn = pszInput;
 	pOut = szOutput;
 
@@ -335,6 +340,10 @@ void CScriptObject::WriteToScriptFile( FileHandle_t fp )
 			g_pFullFileSystem->FPrintf( fp, "\t\t}\r\n" );
 			g_pFullFileSystem->FPrintf( fp, "\t\t{ \"%s\" }\r\n", CleanFloat( fcurValue ) );
 			break;
+		case O_DIVIDER:
+			g_pFullFileSystem->FPrintf( fp, "\t\t\"\"\r\n" );
+			g_pFullFileSystem->FPrintf( fp, "\t\t{ DIVIDER }\r\n" );
+			break;
 		case O_CATEGORY:
 			g_pFullFileSystem->FPrintf( fp, "\t\t\"%s\"\r\n", prompt );
 			g_pFullFileSystem->FPrintf( fp, "\t\t{ CATEGORY }\r\n" );
@@ -399,6 +408,7 @@ void CScriptObject::WriteToFile( FileHandle_t fp )
 			FixupString( curValue, sizeof( curValue ) );
 			g_pFullFileSystem->FPrintf( fp, "\"%s\"\r\n", curValue );
 			break;
+		case O_DIVIDER:
 		case O_CATEGORY:
 			break;
 		case O_LIST:
@@ -426,7 +436,7 @@ void CScriptObject::WriteToFile( FileHandle_t fp )
 
 void CScriptObject::WriteToConfig( void )
 {
-	if ( type == O_OBSOLETE || type == O_CATEGORY )
+	if ( type == O_OBSOLETE || type == O_CATEGORY || type == O_DIVIDER )
 		return;
 
 	char *pszKey;
@@ -500,13 +510,12 @@ void CScriptObject::WriteToConfig( void )
 	//	CFG_SetKey( g_szCurrentConfigFile, pszKey, szValue, bSetInfo );
 }
 
-
 objtype_t CScriptObject::GetType( char *pszType )
 {
 	int i;
 	int nTypes;
 
-	nTypes = sizeof( objtypes ) / sizeof( objtypedesc_t);
+	nTypes = sizeof( objtypes ) / sizeof( objtypedesc_t );
 
 	for ( i = 0; i < nTypes; i++ )
 	{
@@ -543,8 +552,8 @@ bool CScriptObject::ReadFromBuffer( const char **pBuffer, bool isNewObject )
 
 	// Parse the Prompt
 	*pBuffer = engine->ParseFile( *pBuffer, token, sizeof( token ) );
-	if ( strlen( token ) <= 0 )
-		return false;
+	//if ( strlen( token ) <= 0 )
+	//	return false;
 
 	if ( isNewObject )
 	{
@@ -680,6 +689,7 @@ bool CScriptObject::ReadFromBuffer( const char **pBuffer, bool isNewObject )
 				return false;
 			}
 			break;
+		case O_DIVIDER:
 		case O_CATEGORY:
 			// Parse the next {
 			*pBuffer = engine->ParseFile( *pBuffer, token, sizeof( token ) );
@@ -728,13 +738,13 @@ bool CScriptObject::ReadFromBuffer( const char **pBuffer, bool isNewObject )
 					AddItem( pItem );
 				}
 			}
-			break;
+		break;
 	}
 
 	//
 	// Now read in the default value
 
-	if ( newType != O_CATEGORY ) // Categories don't have a value
+	if ( newType != O_CATEGORY && newType != O_DIVIDER ) // Categories don't have a value
 	{
 		// Parse the {
 		*pBuffer = engine->ParseFile( *pBuffer, token, sizeof( token ) );
@@ -794,7 +804,7 @@ bool CScriptObject::ReadFromBuffer( const char **pBuffer, bool isNewObject )
 		Msg( "Expecting '{', got '%s'", token );
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -1088,7 +1098,7 @@ void CDescription::TransferCurrentValues( const char *pszConfigFile )
 		}
 		*/
 
-		if ( pObj->type == O_OBSOLETE || pObj->type == O_CATEGORY )
+		if ( pObj->type == O_OBSOLETE || pObj->type == O_CATEGORY || pObj->type == O_DIVIDER )
 		{
 			pObj = pObj->pNext;
 			continue;

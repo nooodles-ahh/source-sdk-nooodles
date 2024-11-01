@@ -54,6 +54,12 @@ COptionsSubMouse::COptionsSubMouse(vgui::Panel *parent) : PropertyPage(parent, N
 		"#GameUI_ReverseJoystick", 
 		"joy_inverty" );
 
+	m_pMouseRawInputCheckBox = new CCvarToggleCheckButton(
+		this,
+		"MouseRaw",
+		"#GameUI_MouseRaw",
+		"m_rawinput" );
+
 	m_pMouseSensitivitySlider = new CCvarSlider( this, "Slider", "#GameUI_MouseSensitivity",
 		1.0f, 20.0f, "sensitivity", true );
 
@@ -121,6 +127,7 @@ void COptionsSubMouse::OnResetData()
 	m_pJoyYawSensitivitySlider->Reset();
 	m_pJoyPitchSensitivitySlider->Reset();
 	m_pMouseAccelSlider->Reset();
+	m_pMouseRawInputCheckBox->Reset();
 
 	ConVarRef m_customaccel( "m_customaccel" );
 	if ( m_customaccel.IsValid() )
@@ -144,6 +151,7 @@ void COptionsSubMouse::OnApplyChanges()
 	m_pJoyYawSensitivitySlider->ApplyChanges();
 	m_pJoyPitchSensitivitySlider->ApplyChanges();
 	m_pMouseAccelSlider->ApplyChanges();
+	m_pMouseRawInputCheckBox->ApplyChanges();
 
 	engine->ClientCmd_Unrestricted( "joyadvancedupdate" );
 }

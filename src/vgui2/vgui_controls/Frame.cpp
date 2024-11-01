@@ -1226,10 +1226,10 @@ void Frame::PerformLayout()
 	GetSize(wide, tall);
 		
 #if !defined( _X360 )
-	int DRAGGER_SIZE = GetDraggerSize();
-	int CORNER_SIZE = GetCornerSize();
+	int DRAGGER_SIZE = PROPORTIONAL_VALUE(GetDraggerSize());
+	int CORNER_SIZE = PROPORTIONAL_VALUE(GetCornerSize());
 	int CORNER_SIZE2 = CORNER_SIZE * 2;
-	int BOTTOMRIGHTSIZE = GetBottomRightSize();
+	int BOTTOMRIGHTSIZE = PROPORTIONAL_VALUE(GetBottomRightSize());
 
 	_topGrip->SetBounds(CORNER_SIZE, 0, wide - CORNER_SIZE2, DRAGGER_SIZE);
 	_leftGrip->SetBounds(0, CORNER_SIZE, DRAGGER_SIZE, tall - CORNER_SIZE2);
@@ -1243,7 +1243,7 @@ void Frame::PerformLayout()
 
 	_bottomRightGrip->SetBounds(wide - BOTTOMRIGHTSIZE, tall - BOTTOMRIGHTSIZE, BOTTOMRIGHTSIZE, BOTTOMRIGHTSIZE);
 	
-	_captionGrip->SetSize(wide-10,GetCaptionHeight());
+	_captionGrip->SetSize(wide - PROPORTIONAL_VALUE(10),GetCaptionHeight());
 	
 	_topGrip->MoveToFront();
 	_bottomGrip->MoveToFront();
@@ -1258,7 +1258,11 @@ void Frame::PerformLayout()
 	_menuButton->MoveToFront();
 	_minimizeButton->MoveToFront();
 	_minimizeToSysTrayButton->MoveToFront();
-	_menuButton->SetBounds(5+2, 5+3, GetCaptionHeight()-5, GetCaptionHeight()-5);
+	_menuButton->SetBounds(
+		PROPORTIONAL_VALUE(5+2), 
+		PROPORTIONAL_VALUE(5+3), 
+		PROPORTIONAL_VALUE(GetCaptionHeight()-5), 
+		PROPORTIONAL_VALUE(GetCaptionHeight()-5));
 #endif
 
 	float scale = 1;

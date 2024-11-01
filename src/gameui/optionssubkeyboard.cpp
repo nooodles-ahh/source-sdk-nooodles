@@ -110,6 +110,10 @@ void COptionsSubKeyboard::OnKeyCodeTyped(vgui::KeyCode code)
 	{
 		OnCommand("ChangeKey");
 	}
+	else if ( code == KEY_ESCAPE )
+	{
+		// Eat this key so it doesn't get handled by the parent
+	}
 	else
 	{
 		BaseClass::OnKeyCodeTyped(code);
@@ -125,6 +129,8 @@ void COptionsSubKeyboard::OnCommand( const char *command )
 	{
 		// open a box asking if we want to restore defaults
 		QueryBox *box = new QueryBox("#GameUI_KeyboardSettings", "#GameUI_KeyboardSettingsText");
+		box->SetScheme(GetScheme());
+		box->SetProportional(IsProportional());
 		box->AddActionSignalTarget(this);
 		box->SetOKCommand(new KeyValues("Command", "command", "DefaultsOK"));
 		box->DoModal();
@@ -551,10 +557,6 @@ void COptionsSubKeyboard::ApplyAllBindings( void )
 		if ( keyname && keyname[ 0 ] )
 		{
 			ButtonCode_t code = g_pInputSystem->StringToButtonCode( keyname );
-			//if ( IsJoystickCode( code ) )
-			//{
-			//	code = ButtonCodeToJoystickButtonCode( code, m_nSplitScreenUser );
-			//}
 
 			// Tell the engine
 			BindKey( code, binding );
@@ -580,7 +582,7 @@ void COptionsSubKeyboard::FillInDefaultBindings( void )
 		return;
 
 	// L4D: also unbind other keys
-	engine->ClientCmd_Unrestricted( "unbindall\n" );
+	//engine->ClientCmd_Unrestricted( "unbindall\n" );
 
 	int size = g_pFullFileSystem->Size(fh) + 1;
 	CUtlBuffer buf( 0, size, CUtlBuffer::TEXT_BUFFER );
@@ -603,16 +605,8 @@ void COptionsSubKeyboard::FillInDefaultBindings( void )
 		if ( cmd[ 0 ] == '\0' )
 			break;
 
-		if ( !Q_stricmp(cmd, "bind") ||
-		     !Q_stricmp(cmd, "cmd2 bind") )
+		if ( !Q_stricmp(cmd, "bind") )
 		{
-			// FIXME:  If we ever support > 2 player splitscreen this will need to be reworked.
-			int nJoyStick = 0;
-			if ( !stricmp(cmd, "cmd2 bind") )
-			{
-				nJoyStick = 1;
-			}
-
 			// Key name
 			char szKeyName[256];
 			data = UTIL_Parse( data, szKeyName, sizeof(szKeyName) );
@@ -623,10 +617,6 @@ void COptionsSubKeyboard::FillInDefaultBindings( void )
 			data = UTIL_Parse( data, szBinding, sizeof(szBinding) );
 			if ( szKeyName[ 0 ] == '\0' )  
 				break; // Error
-
-			// Skip it if it's a bind for the other slit
-			//if ( nJoyStick != m_nSplitScreenUser )
-			//	continue;
 
 			// Find item
 			KeyValues *item = GetItemForBinding( szBinding );
@@ -806,14 +796,18 @@ class COptionsSubKeyboardAdvancedDlg : public vgui::Frame
 {
 	DECLARE_CLASS_SIMPLE( COptionsSubKeyboardAdvancedDlg, vgui::Frame );
 public:
-	COptionsSubKeyboardAdvancedDlg( vgui::VPANEL hParent ) : BaseClass( NULL, NULL )
+	COptionsSubKeyboardAdvancedDlg( vgui::Panel* pParent ) : BaseClass( NULL, NULL )
 	{
-		// parent is ignored, since we want look like we're steal focus from the parent (we'll become modal below)
-		SetProportional( true );
+		if (pParent)
+		{
+			SetProportional(pParent->IsProportional());
+			SetScheme(pParent->GetScheme());
+		}
+
 		SetTitle("#GameUI_KeyboardAdvanced_Title", true);
 		SetSize(
-			vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), 280 ),
-			vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), 140 )
+			PROPORTIONAL_VALUE( 280 ),
+			PROPORTIONAL_VALUE( 140 )
 		);
 		LoadControlSettings( "resource/OptionsSubKeyboardAdvancedDlg.res" );
 		MoveToCenterOfScreen();
@@ -886,7 +880,7 @@ void COptionsSubKeyboard::OpenKeyboardAdvancedDialog()
 {
 	if (!m_OptionsSubKeyboardAdvancedDlg.Get())
 	{
-		m_OptionsSubKeyboardAdvancedDlg = new COptionsSubKeyboardAdvancedDlg(GetVParent());
+		m_OptionsSubKeyboardAdvancedDlg = new COptionsSubKeyboardAdvancedDlg(this);
 	}
 	m_OptionsSubKeyboardAdvancedDlg->Activate();
 }

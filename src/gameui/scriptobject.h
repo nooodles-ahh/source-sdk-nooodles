@@ -1,4 +1,4 @@
-﻿//========= Copyright � 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright � 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose:
 //
@@ -27,6 +27,7 @@ enum objtype_t
 	O_STRING,
 	O_CATEGORY,
 	O_OBSOLETE,
+	O_DIVIDER,
 };
 
 typedef struct

@@ -75,7 +75,7 @@ class COptionsSubVideoThirdPartyCreditsDlg : public vgui::Frame
 {
 	DECLARE_CLASS_SIMPLE( COptionsSubVideoThirdPartyCreditsDlg, vgui::Frame );
 public:
-	COptionsSubVideoThirdPartyCreditsDlg( vgui::VPANEL hParent );
+	COptionsSubVideoThirdPartyCreditsDlg( vgui::Panel* pParent );
 
 	virtual void Activate();
 	void OnKeyCodeTyped(vgui::KeyCode code);

@@ -14,7 +14,7 @@
 #include "vgui/IInput.h"
 #include "steam/steam_api.h"
 #include "tier1/strtools.h"
-#include "steam/steam_api.h"
+#include "cvartogglecheckbutton.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -56,7 +56,8 @@ COptionsSubAudio::COptionsSubAudio(vgui::Panel *parent) : PropertyPage(parent, N
 	m_pSpeakerSetupCombo->AddItem( "#GameUI_5Speakers", new KeyValues("SpeakerSetup", "speakers", 5) );
 	m_pSpeakerSetupCombo->AddItem( "#GameUI_7Speakers", new KeyValues("SpeakerSetup", "speakers", 7) );
 
-   m_pSpokenLanguageCombo = new ComboBox (this, "AudioSpokenLanguage", 6, false );
+	m_pSpokenLanguageCombo = new ComboBox (this, "AudioSpokenLanguage", 6, false );
+	m_pSndMuteLoseFocusCheck = new CCvarToggleCheckButton( this, "snd_mute_losefocus", "#GameUI_SndMuteLoseFocus", "snd_mute_losefocus" );
 }
 
 //-----------------------------------------------------------------------------
@@ -74,6 +75,7 @@ void COptionsSubAudio::OnResetData()
 	m_bRequireRestart = false;
 	m_pSFXSlider->Reset();
 	m_pMusicSlider->Reset();
+	m_pSndMuteLoseFocusCheck->Reset();
 
 
 	// reset the combo boxes
@@ -191,6 +193,7 @@ void COptionsSubAudio::OnApplyChanges()
 {
 	m_pSFXSlider->ApplyChanges();
 	m_pMusicSlider->ApplyChanges();
+	m_pSndMuteLoseFocusCheck->ApplyChanges();
 
 	// set the cvars appropriately
 	// Tracker 28933:  Note we can't do this because closecaption is marked
@@ -361,18 +364,24 @@ void COptionsSubAudio::OpenThirdPartySoundCreditsDialog()
 {
    if (!m_OptionsSubAudioThirdPartyCreditsDlg.Get())
    {
-      m_OptionsSubAudioThirdPartyCreditsDlg = new COptionsSubAudioThirdPartyCreditsDlg(GetVParent());
+      m_OptionsSubAudioThirdPartyCreditsDlg = new COptionsSubAudioThirdPartyCreditsDlg(this);
    }
    m_OptionsSubAudioThirdPartyCreditsDlg->Activate();
 }
 
 
-COptionsSubAudioThirdPartyCreditsDlg::COptionsSubAudioThirdPartyCreditsDlg( vgui::VPANEL hParent ) : BaseClass( NULL, NULL )
+COptionsSubAudioThirdPartyCreditsDlg::COptionsSubAudioThirdPartyCreditsDlg( vgui::Panel* pParent ) : BaseClass( NULL, NULL )
 {
+	if (pParent)
+	{
+		SetProportional(pParent->IsProportional());
+		SetScheme(pParent->GetScheme());
+	}
+
 	SetTitle( "#GameUI_ThirdPartyAudio_Title", true );
 	SetSize(
-		vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), 500 ),
-		vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), 200 ) 
+		PROPORTIONAL_VALUE( 500 ),
+		PROPORTIONAL_VALUE( 200 ) 
 	);
 
 	MoveToCenterOfScreen();

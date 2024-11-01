@@ -18,6 +18,7 @@
 
 class CLabeledCommandComboBox;
 class CCvarSlider;
+class CCvarToggleCheckButton;
 
 //-----------------------------------------------------------------------------
 // Purpose: Audio Details, Part of OptionsDialog
@@ -43,6 +44,10 @@ private:
 	{
 		OnControlModified();
 	}
+	MESSAGE_FUNC_INT(OnCheckButtonChecked, "CheckButtonChecked", state)
+	{
+		OnControlModified();
+	}
 
 	MESSAGE_FUNC( RunTestSpeakers, "RunTestSpeakers" );
 
@@ -51,7 +56,8 @@ private:
 	CCvarSlider					*m_pSFXSlider;
 	CCvarSlider					*m_pMusicSlider;
 	vgui::ComboBox				*m_pCloseCaptionCombo;
-	bool						   m_bRequireRestart;
+	CCvarToggleCheckButton		*m_pSndMuteLoseFocusCheck;
+	bool						 m_bRequireRestart;
    
    vgui::ComboBox				*m_pSpokenLanguageCombo;
    MESSAGE_FUNC( OpenThirdPartySoundCreditsDialog, "OpenThirdPartySoundCreditsDialog" );
@@ -68,7 +74,7 @@ class COptionsSubAudioThirdPartyCreditsDlg : public vgui::Frame
 {
 	DECLARE_CLASS_SIMPLE( COptionsSubAudioThirdPartyCreditsDlg, vgui::Frame );
 public:
-	COptionsSubAudioThirdPartyCreditsDlg( vgui::VPANEL hParent );
+	COptionsSubAudioThirdPartyCreditsDlg( vgui::Panel *pParent );
 
 	virtual void Activate();
 	void OnKeyCodeTyped(vgui::KeyCode code);
