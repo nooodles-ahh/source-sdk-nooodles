@@ -124,10 +124,10 @@ void COptionsDialog::OpenGammaDialog()
 void COptionsDialog::ApplySchemeSettings( vgui::IScheme* pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
-	//SetSize(
-	//	PROPORTIONAL_VALUE( 512 ),
-	//	PROPORTIONAL_VALUE( 415 ) 
-	//);
+	SetSize(
+		PROPORTIONAL_VALUE( 512 ),
+		PROPORTIONAL_VALUE( 415 ) 
+	);
 	SetSizeable( false );
 	GetPropertySheet()->SetTabWidth( 84 );
 
@@ -137,6 +137,7 @@ void COptionsDialog::ApplySchemeSettings( vgui::IScheme* pScheme )
 		Panel* page = GetPropertySheet()->GetPage( i );
 		if ( page != GetPropertySheet()->GetActivePage() )
 		{
+			page->InvalidateLayout();
 			page->SetVisible( false );
 		}
 	}

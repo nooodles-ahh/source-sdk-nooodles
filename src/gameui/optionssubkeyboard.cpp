@@ -52,8 +52,6 @@ COptionsSubKeyboard::COptionsSubKeyboard(vgui::Panel *parent) : PropertyPage(par
 	CreateKeyBindingList();
 	// Store all current key bindings
 	SaveCurrentBindings();
-	// Parse default descriptions
-	ParseActionDescriptions();
 	
 	m_pSetBindingButton = new Button(this, "ChangeKeyButton", "");
 	m_pClearBindingButton = new Button(this, "ClearKeyButton", "");
@@ -744,6 +742,12 @@ void COptionsSubKeyboard::OnThink()
 void COptionsSubKeyboard::ApplySchemeSettings( vgui::IScheme* pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
+
+	m_pKeyBindList->RemoveAll();
+	m_pKeyBindList->RemoveAllSections();
+	// Parse default descriptions
+	ParseActionDescriptions();
+
 	LoadControlSettings( "Resource/OptionsSubKeyboard.res" );
 }
 

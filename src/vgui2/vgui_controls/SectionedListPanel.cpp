@@ -1109,20 +1109,15 @@ void SectionedListPanel::ApplySettings(KeyValues *inResourceData)
 	{
 		m_iLineSpacing = DEFAULT_LINE_SPACING;
 	}
-	if (IsProportional())
-	{
-		m_iLineSpacing = scheme()->GetProportionalScaledValueEx(GetScheme(), m_iLineSpacing);
-	}
+	
+	m_iLineSpacing = PROPORTIONAL_VALUE(m_iLineSpacing);
 
 	m_iSectionGap = inResourceData->GetInt("sectiongap", 0);
 	if (!m_iSectionGap)
 	{
 		m_iSectionGap = DEFAULT_SECTION_GAP;
 	}
-	if (IsProportional())
-	{
-		m_iSectionGap = scheme()->GetProportionalScaledValueEx(GetScheme(), m_iSectionGap);
-	}
+	m_iSectionGap = PROPORTIONAL_VALUE(m_iSectionGap);
 
 #ifdef VGUI_ENHANCEMENTS
 	KeyValues* pKVScrollBar = inResourceData->FindKey("ScrollBar");
