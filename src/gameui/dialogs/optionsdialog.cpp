@@ -45,7 +45,7 @@ DECLARE_GAMEUI_DIALOG_FACTORY(OpenOptionsDialog, COptionsDialog)
 //-----------------------------------------------------------------------------
 COptionsDialog::COptionsDialog(vgui::Panel *parent, vgui::HScheme scheme) : PropertyDialog(parent, "OptionsDialog")
 {
-	SetScheme(scheme);
+	SetScheme(parent->GetScheme());
 	SetDeleteSelfOnClose( true );
 	SetBounds(
 		0,

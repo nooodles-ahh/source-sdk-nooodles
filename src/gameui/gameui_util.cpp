@@ -15,7 +15,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-ConVar gameui_proportional_scaling( "gameui_proportional_scaling", "0", FCVAR_NONE, "Scale the menu proportionally with the screen resolution" );
+ConVar gameui_proportional_scaling( "gameui_proportional_scaling", "1", FCVAR_NONE, "Scale the menu proportionally with the screen resolution" );
 
 //-----------------------------------------------------------------------------
 // Purpose: Scans player names

@@ -73,10 +73,58 @@ int UI_IsDebug()
 }
 #endif
 
+
+class CSizingPanel : public Panel
+{
+	DECLARE_CLASS_SIMPLE(CSizingPanel, Panel);
+public:
+	CSizingPanel() : BaseClass(nullptr, "SizingPanel")
+	{
+		vgui::VPANEL gameuiPanel = enginevguifuncs->GetPanel(PANEL_GAMEUIDLL);
+		SetParent(gameuiPanel);
+		SetZPos(-9999);
+		Resize();
+	}
+
+	virtual void ApplySchemeSettings(vgui::IScheme* pScheme)
+	{
+		BaseClass::ApplySchemeSettings(pScheme);
+		Resize();
+	}
+
+	void Resize()
+	{
+		int screenW, screenH;
+		g_pVGuiSurface->GetScreenSize(screenW, screenH);
+		float aspect = (float)screenW / (float)screenH;
+#if 1
+		const float targetHeight = 900.f;
+		const float scale = 480.f/targetHeight;
+		screenH = screenH * scale;
+		screenW = screenH * aspect;
+#else
+		// 1920x1080 but adjusted for different aspect ratios
+		if (aspect > 1.6f)
+		{
+			screenW = screenH * aspect;
+		}
+		else
+		{
+			screenH = screenW / aspect;
+		}
+#endif
+		SetSize(screenW, screenH);
+	}
+};
+
+static CSizingPanel* s_pSizingPanel = NULL;
+
 //=============================================================================
 CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel")
 {
 	static ConCommand gamemenucommand( "gamemenucommand", CC_gamemenucommand, "TODO\n", FCVAR_NONE );
+
+	s_pSizingPanel = new CSizingPanel();
 
 	//MakePopup( false );
 
@@ -89,14 +137,14 @@ CBaseModPanel::CBaseModPanel(): BaseClass(0, "CBaseModPanel")
 	// needed to allow engine to exec startup commands (background map signal is 1 frame behind) 
 	m_DelayActivation = 3;
 	
-	m_UIScheme = vgui::scheme()->LoadSchemeFromFileEx( 0, "resource/sourcescheme.res", "SourceScheme" );
+	SetProportional( gameui_proportional_scaling.GetBool() );
+	m_UIScheme = vgui::scheme()->LoadSchemeFromFileEx(s_pSizingPanel->GetVPanel(), "resource/GameUIScheme.res", "GameUIScheme");
 	SetScheme( m_UIScheme );
 
 	int wide, tall;
 	vgui::surface()->GetScreenSize( wide, tall );
 	SetSize( wide, tall );
 
-	SetProportional( gameui_proportional_scaling.GetBool() );
 	m_iBackgroundImageID = -1;
 
 	m_bInGame = false;
@@ -337,27 +385,27 @@ bool CBaseModPanel::UpdateProgressBar( float progress, const char *statusText )
 		float flTime = Plat_FloatTime();
 		float deltaTime = flTime - s_LastEngineTime;
 
-		//bool bUpdated = false;
+		bool bUpdated = false;
 
 		if ( ( pLoadingDialog->GetProgressPoint() < progress ) || ( deltaTime > 0.06f ) )
 		{
 			// update progress
 			pLoadingDialog->SetProgressPoint( progress );
 			s_LastEngineTime = flTime;
-			//bUpdated = true;
+			bUpdated = true;
 		}
 
 		if ( statusText && statusText[ 0 ] )
 		{
 			pLoadingDialog->SetStatusText( statusText );
-			//bUpdated = true;
+			bUpdated = true;
 		}
 
-		return true;
+		return bUpdated;
 	}
 
 	// no update required*/
-	return true;
+	return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -375,11 +423,6 @@ static void BaseUI_PositionDialog(vgui::PHandle dlg)
 	// Center it, keeping requested size
 	dlg->SetPos(x + ((ww - wide) / 2), y + ((wt - tall) / 2));
 }
-
-#ifndef PROPORTIONAL_VALUE
-#define PROPORTIONAL_VALUE(x) \
-	(IsProportional() ? vgui::scheme()->GetProportionalScaledValueEx( GetScheme(), x ) : x)
-#endif
 
 //=============================================================================
 void CBaseModPanel::ApplySchemeSettings(IScheme *pScheme)
@@ -524,6 +567,10 @@ void CBaseModPanel::OnCommand(const char *command)
 		vgui::surface()->RestrictPaintToSinglePanel( GetVPanel() );
 		engine->ClientCmd_Unrestricted( "quit\n" );
 	}
+	else if (!V_stricmp(command, "OpenServerBrowser"))
+	{
+		engine->ClientCmd_Unrestricted("OpenServerBrowser");
+	}
 	else
 	{
 		BaseClass::OnCommand( command );
@@ -567,17 +614,11 @@ CON_COMMAND_F( openserverbrowser, "Opens server browser", 0 )
 		g_VModuleLoader.ActivateModule( "Servers" );
 
 		// if an argument was passed, that's the tab index to show, send a message to server browser to switch to that tab
-		//if ( args.ArgC() > 1 )
-		//{
-		//	KeyValues* pKV = new KeyValues( "ShowServerBrowserPage" );
-		//	pKV->SetInt( "page", atoi( args[ 1 ] ) );
-		//	g_VModuleLoader.PostMessageToAllModules( pKV );
-		//}
-
-#ifdef INFESTED_DLL
-		KeyValues* pSchemeKV = new KeyValues( "SetCustomScheme" );
-		pSchemeKV->SetString( "SchemeName", "SwarmServerBrowserScheme" );
-		g_VModuleLoader.PostMessageToAllModules( pSchemeKV );
-#endif
+		if ( args.ArgC() > 1 )
+		{
+			KeyValues* pKV = new KeyValues( "ShowServerBrowserPage" );
+			pKV->SetInt( "page", atoi( args[ 1 ] ) );
+			g_VModuleLoader.PostMessageToAllModules( pKV );
+		}
 	}
 }

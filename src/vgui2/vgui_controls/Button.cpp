@@ -993,7 +993,7 @@ void Button::OnMousePressed(MouseCode code)
 	if ( _activationType == ACTIVATE_ONRELEASED )
 	{
 		SetArmed( true );
-		SetSelected( true );
+		//SetSelected( true );
 	}
 	RecalculateDepressedState();
 #endif
