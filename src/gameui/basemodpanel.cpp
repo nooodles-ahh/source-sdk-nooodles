@@ -39,7 +39,7 @@
 
 #include "loadingdialog.h"
 #include "engineinterface.h"
-#include "dialogs/quitdialog.h"
+#include "quitdialog.h"
 
 
 // memdbgon must be the last include file in a .cpp file!!!

@@ -7,7 +7,7 @@ $Configuration
 {
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\gameui;$SRCDIR\gameui\dialogs;$SRCDIR\gameui\serverbrowser;"
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\gameui;"
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\gameui\legacy"
 		$PreprocessorDefinitions		"$BASE;VERSION_SAFE_STEAM_API_INTERFACES"
 		//$PreprocessorDefinitions			"$BASE;GAMEUI_EMBEDDED"
@@ -16,12 +16,12 @@ $Configuration
 
 $Project
 {
-	$Folder	"GameUI"
+	$Folder	"Source Files"
 	{
 		$Folder "Legacy"
 		{
-			$File	"$SRCDIR\gameui\legacy\basemodpanel.cpp" \
-					"$SRCDIR\gameui\legacy\gamemenu.cpp"
+			$File	"$SRCDIR\gameui\basemodpanel.cpp" \
+					"$SRCDIR\gameui\gamemenu.cpp"
 			{
 				$Configuration
 				{
@@ -31,29 +31,29 @@ $Project
 					}
 				}
 			}
-			$File	"$SRCDIR\gameui\legacy\basemodpanel.h" \
-					"$SRCDIR\gameui\legacy\gamemenu.h"
+			$File	"$SRCDIR\gameui\basemodpanel.h" \
+					"$SRCDIR\gameui\gamemenu.h"
 		}
 	
 		$Folder "Dialogs"
 		{
-			$File	"$SRCDIR\gameui\dialogs\createmultiplayergamedialog.cpp" \
-					"$SRCDIR\gameui\dialogs\createmultiplayergamebotpage.cpp" \
-					"$SRCDIR\gameui\dialogs\createmultiplayergamegameplaypage.cpp" \
-					"$SRCDIR\gameui\dialogs\createmultiplayergameserverpage.cpp" \
-					"$SRCDIR\gameui\dialogs\gameconsoledialog.cpp" \
-					"$SRCDIR\gameui\dialogs\loadingdialog.cpp" \
-					"$SRCDIR\gameui\dialogs\optionsdialog.cpp" \
-					"$SRCDIR\gameui\dialogs\optionssubaudio.cpp" \
-					"$SRCDIR\gameui\dialogs\optionssubdifficulty.cpp" \
-					"$SRCDIR\gameui\dialogs\optionssubgame.cpp" \
-					"$SRCDIR\gameui\dialogs\optionssubkeyboard.cpp" \
-					"$SRCDIR\gameui\dialogs\optionssubmouse.cpp" \
-					"$SRCDIR\gameui\dialogs\multiplayeradvanceddialog.cpp" \
-					"$SRCDIR\gameui\dialogs\optionssubvideo.cpp" \
-					"$SRCDIR\gameui\dialogs\optionssubvoice.cpp" \
-					"$SRCDIR\gameui\dialogs\playerlistdialog.cpp" \
-					"$SRCDIR\gameui\dialogs\quitdialog.cpp"
+			$File	"$SRCDIR\gameui\createmultiplayergamedialog.cpp" \
+					"$SRCDIR\gameui\createmultiplayergamebotpage.cpp" \
+					"$SRCDIR\gameui\createmultiplayergamegameplaypage.cpp" \
+					"$SRCDIR\gameui\createmultiplayergameserverpage.cpp" \
+					"$SRCDIR\gameui\gameconsoledialog.cpp" \
+					"$SRCDIR\gameui\loadingdialog.cpp" \
+					"$SRCDIR\gameui\optionsdialog.cpp" \
+					"$SRCDIR\gameui\optionssubaudio.cpp" \
+					"$SRCDIR\gameui\optionssubdifficulty.cpp" \
+					"$SRCDIR\gameui\optionssubgame.cpp" \
+					"$SRCDIR\gameui\optionssubkeyboard.cpp" \
+					"$SRCDIR\gameui\optionssubmouse.cpp" \
+					"$SRCDIR\gameui\multiplayeradvanceddialog.cpp" \
+					"$SRCDIR\gameui\optionssubvideo.cpp" \
+					"$SRCDIR\gameui\optionssubvoice.cpp" \
+					"$SRCDIR\gameui\playerlistdialog.cpp" \
+					"$SRCDIR\gameui\quitdialog.cpp"
 			{
 				$Configuration
 				{
@@ -64,30 +64,30 @@ $Project
 				}
 			}
 				
-			$File	"$SRCDIR\gameui\dialogs\createmultiplayergamedialog.h" \
-					"$SRCDIR\gameui\dialogs\createmultiplayergamebotpage.h" \
-					"$SRCDIR\gameui\dialogs\createmultiplayergamegameplaypage.h" \
-					"$SRCDIR\gameui\dialogs\createmultiplayergameserverpage.h" \
-					"$SRCDIR\gameui\dialogs\gameconsoledialog.h" \
-					"$SRCDIR\gameui\dialogs\loadingdialog.h" \
-					"$SRCDIR\gameui\dialogs\optionsdialog.h" \
-					"$SRCDIR\gameui\dialogs\optionssubaudio.h" \
-					"$SRCDIR\gameui\dialogs\optionssubdifficulty.h" \
-					"$SRCDIR\gameui\dialogs\optionssubgame.h" \
-					"$SRCDIR\gameui\dialogs\optionssubkeyboard.h" \
-					"$SRCDIR\gameui\dialogs\optionssubmouse.h" \
-					"$SRCDIR\gameui\dialogs\optionssubmultiplayer.h" \
-					"$SRCDIR\gameui\dialogs\multiplayeradvanceddialog.h" \
-					"$SRCDIR\gameui\dialogs\optionssubvideo.h" \
-					"$SRCDIR\gameui\dialogs\optionssubvoice.h" \
-					"$SRCDIR\gameui\dialogs\playerlistdialog.h" \
-					"$SRCDIR\gameui\dialogs\quitdialog.h"
+			$File	"$SRCDIR\gameui\createmultiplayergamedialog.h" \
+					"$SRCDIR\gameui\createmultiplayergamebotpage.h" \
+					"$SRCDIR\gameui\createmultiplayergamegameplaypage.h" \
+					"$SRCDIR\gameui\createmultiplayergameserverpage.h" \
+					"$SRCDIR\gameui\gameconsoledialog.h" \
+					"$SRCDIR\gameui\loadingdialog.h" \
+					"$SRCDIR\gameui\optionsdialog.h" \
+					"$SRCDIR\gameui\optionssubaudio.h" \
+					"$SRCDIR\gameui\optionssubdifficulty.h" \
+					"$SRCDIR\gameui\optionssubgame.h" \
+					"$SRCDIR\gameui\optionssubkeyboard.h" \
+					"$SRCDIR\gameui\optionssubmouse.h" \
+					"$SRCDIR\gameui\optionssubmultiplayer.h" \
+					"$SRCDIR\gameui\multiplayeradvanceddialog.h" \
+					"$SRCDIR\gameui\optionssubvideo.h" \
+					"$SRCDIR\gameui\optionssubvoice.h" \
+					"$SRCDIR\gameui\playerlistdialog.h" \
+					"$SRCDIR\gameui\quitdialog.h"
 		}
 		
 		$Folder "Server Browser"
 		{
-			$File	"$SRCDIR\gameui\serverbrowser\serverbrowserdialog.cpp" \
-					"$SRCDIR\gameui\serverbrowser\serverlistpage.cpp"
+			$File	"$SRCDIR\gameui\serverbrowserdialog.cpp" \
+					"$SRCDIR\gameui\serverlistpage.cpp"
 			{
 				$Configuration
 				{
@@ -97,8 +97,8 @@ $Project
 					}
 				}
 			}
-			$File	"$SRCDIR\gameui\serverbrowser\serverbrowserdialog.h" \
-					"$SRCDIR\gameui\serverbrowser\serverlistpage.h"
+			$File	"$SRCDIR\gameui\serverbrowserdialog.h" \
+					"$SRCDIR\gameui\serverlistpage.h"
 		}
 	
 		$File	"$SRCDIR\gameui\basepanel.h" \

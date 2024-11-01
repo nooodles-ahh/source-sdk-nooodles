@@ -21,6 +21,9 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+
+ConVar fov_desired("fov_desired", "75", FCVAR_ARCHIVE | FCVAR_USERINFO, "Sets the base field-of-view.", true, 75.0, true, 90.0);
+
 //-----------------------------------------------------------------------------
 // Globals
 //-----------------------------------------------------------------------------
