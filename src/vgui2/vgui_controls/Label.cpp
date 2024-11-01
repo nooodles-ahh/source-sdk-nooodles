@@ -1253,8 +1253,7 @@ void Label::ApplySettings( KeyValues *inResourceData )
 	// Had to play it safe and add a new key for backwards compatibility
 	m_bUseProportionalInsets = inResourceData->GetInt("use_proportional_insets", 0) > 0;
 #ifdef VGUI_ENHANCEMENTS
-	if ( IsProportional() )
-		m_bUseProportionalInsets = true;
+	// TODO - FIX ME LOL
 #endif
 	if ( m_bUseProportionalInsets )
 	{

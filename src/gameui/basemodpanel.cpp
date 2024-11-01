@@ -97,22 +97,14 @@ public:
 		int screenW, screenH;
 		g_pVGuiSurface->GetScreenSize(screenW, screenH);
 		float aspect = (float)screenW / (float)screenH;
-#if 1
-		const float targetHeight = 900.f;
-		const float scale = 480.f/targetHeight;
+
+		float targetHeight = 800.f;
+		float scale = 480.f/targetHeight;
+		if (screenH < targetHeight)
+			scale = 480.f / screenH;
+
 		screenH = screenH * scale;
 		screenW = screenH * aspect;
-#else
-		// 1920x1080 but adjusted for different aspect ratios
-		if (aspect > 1.6f)
-		{
-			screenW = screenH * aspect;
-		}
-		else
-		{
-			screenH = screenW / aspect;
-		}
-#endif
 		SetSize(screenW, screenH);
 	}
 };
