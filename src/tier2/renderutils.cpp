@@ -134,7 +134,6 @@ void GenerateBoxVertices(const Vector& vOrigin, const QAngle& angles,
 {
 	matrix3x4_t matTransform;
 	AngleMatrix(angles, matTransform);
-	int iVert = 0;
 	for (int i = 0; i < 8; ++i)
 	{
 		Vector v;
@@ -183,9 +182,14 @@ void RenderWireframeBox(const Vector& vOrigin, const QAngle& angles,
 	CMatRenderContextPtr pRenderContext(materials);
 
 	pRenderContext->BeginRender();
-	pRenderContext->Bind(bZBuffer ? s_pVertexColor : s_pVertexColorIgnoreZ);
+	pRenderContext->Bind(bZBuffer ? s_pWireframe : s_pWireframeIgnoreZ);
 
 	IMesh* pMesh = pRenderContext->GetDynamicMesh();
+
+	Vector verts[8];
+	GenerateBoxVertices(vOrigin, angles, vMins, vMaxs, verts);
+
+	uint col = c.GetRawColor();
 
 	CMeshBuilder meshBuilder;
 
@@ -193,8 +197,8 @@ void RenderWireframeBox(const Vector& vOrigin, const QAngle& angles,
 	meshBuilder.Begin(pMesh, MATERIAL_LINES, 4);
 	for (int i = 0; i < 10; i++)
 	{
-		meshBuilder.Position3fv(v[i & 7].Base());
-		meshBuilder.Color4fv(color);
+		meshBuilder.Position3fv(verts[i & 7].Base());
+		meshBuilder.Color4ubv((unsigned char*)&col);
 		meshBuilder.AdvanceVertex();
 	}
 	meshBuilder.End();
@@ -203,24 +207,24 @@ void RenderWireframeBox(const Vector& vOrigin, const QAngle& angles,
 	// top and bottom
 	meshBuilder.Begin(pMesh, MATERIAL_LINE_STRIP, 4);
 
-	meshBuilder.Position3fv(v[6].Base());
-	meshBuilder.Color4fv(color);
+	meshBuilder.Position3fv(verts[6].Base());
+	meshBuilder.Color4ubv((unsigned char*)&col);
 	meshBuilder.AdvanceVertex();
 
-	meshBuilder.Position3fv(v[0].Base());
-	meshBuilder.Color4fv(color);
+	meshBuilder.Position3fv(verts[0].Base());
+	meshBuilder.Color4ubv((unsigned char*)&col);
 	meshBuilder.AdvanceVertex();
 
-	meshBuilder.Position3fv(v[2].Base());
-	meshBuilder.Color4fv(color);
+	meshBuilder.Position3fv(verts[2].Base());
+	meshBuilder.Color4ubv((unsigned char*)&col);
 	meshBuilder.AdvanceVertex();
 
-	meshBuilder.Position3fv(v[4].Base());
-	meshBuilder.Color4fv(color);
+	meshBuilder.Position3fv(verts[4].Base());
+	meshBuilder.Color4ubv((unsigned char*)&col);
 	meshBuilder.AdvanceVertex();
 
-	meshBuilder.Position3fv(v[6].Base());
-	meshBuilder.Color4fv(color);
+	meshBuilder.Position3fv(verts[6].Base());
+	meshBuilder.Color4ubv((unsigned char*)&col);
 	meshBuilder.AdvanceVertex();
 
 	meshBuilder.End();
@@ -228,24 +232,24 @@ void RenderWireframeBox(const Vector& vOrigin, const QAngle& angles,
 
 	meshBuilder.Begin(pMesh, MATERIAL_LINE_STRIP, 4);
 
-	meshBuilder.Position3fv(v[1].Base());
-	meshBuilder.Color4fv(color);
+	meshBuilder.Position3fv(verts[1].Base());
+	meshBuilder.Color4ubv((unsigned char*)&col);
 	meshBuilder.AdvanceVertex();
 
-	meshBuilder.Position3fv(v[7].Base());
-	meshBuilder.Color4fv(color);
+	meshBuilder.Position3fv(verts[7].Base());
+	meshBuilder.Color4ubv((unsigned char*)&col);
 	meshBuilder.AdvanceVertex();
 
-	meshBuilder.Position3fv(v[5].Base());
-	meshBuilder.Color4fv(color);
+	meshBuilder.Position3fv(verts[5].Base());
+	meshBuilder.Color4ubv((unsigned char*)&col);
 	meshBuilder.AdvanceVertex();
 
-	meshBuilder.Position3fv(v[3].Base());
-	meshBuilder.Color4fv(color);
+	meshBuilder.Position3fv(verts[3].Base());
+	meshBuilder.Color4ubv((unsigned char*)&col);
 	meshBuilder.AdvanceVertex();
 
-	meshBuilder.Position3fv(v[1].Base());
-	meshBuilder.Color4fv(color);
+	meshBuilder.Position3fv(verts[1].Base());
+	meshBuilder.Color4ubv((unsigned char*)&col);
 	meshBuilder.AdvanceVertex();
 
 	meshBuilder.End();
@@ -281,8 +285,8 @@ void RenderBox(const Vector& origin, const QAngle& angles, const Vector& mins, c
 
 	bool bSide = false;
 	uint col = c.GetRawColor();
-	int face = 0;
-	do {
+	for (int face = 0; face < 6; ++face)
+	{
 		Vector v1(0.f);
 
 		v1[face >> 1] = bSide ? 1.f : -1.f; // (&v1.x)[local_20 >> 1] = vVar2;
@@ -319,7 +323,7 @@ void RenderBox(const Vector& origin, const QAngle& angles, const Vector& mins, c
 		} while (iVert < 3);
 		face = face + 1;
 		bSide = !bSide;
-	} while (face < 6);
+	}
 
 	meshBuilder.End();
 	pMesh->Draw();
