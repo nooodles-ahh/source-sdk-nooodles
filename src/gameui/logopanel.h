@@ -17,6 +17,11 @@ public:
 	~CLogoPanel();
 
 	virtual void ApplySchemeSettings( vgui::IScheme *pScheme );
+	virtual void ApplySettings(KeyValues* inResourceData);
+
+private:
+	int m_iOffsetX;
+	int m_iOffsetY;
 };
 
 #endif

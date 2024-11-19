@@ -66,11 +66,11 @@ void MessageBox::Init()
 	SetSizeable(false);
 	
 	m_pOkButton = new Button(this, NULL, "#MessageBox_OK");
-	m_pOkButton->SetCommand( "OnOk" );
+	m_pOkButton->SetCommand( "Ok" );
 	m_pOkButton->AddActionSignalTarget(this);
 
 	m_pCancelButton = new Button(this, NULL, "#MessageBox_Cancel");
-	m_pCancelButton->SetCommand( "OnCancel" );
+	m_pCancelButton->SetCommand( "Cancel" );
 	m_pCancelButton->AddActionSignalTarget(this);
 	m_pCancelButton->SetVisible( false );
 
@@ -113,14 +113,14 @@ void MessageBox::OnCommand( const char *pCommand )
 		vgui::input()->ReleaseAppModalSurface();
 	}
 
-	if ( !Q_stricmp( pCommand, "OnOk" ) )
+	if ( !Q_stricmp( pCommand, "Ok" ) )
 	{
 		if ( m_OkCommand )
 		{
 			PostActionSignal(m_OkCommand->MakeCopy());
 		}
 	}
-	else if ( !Q_stricmp( pCommand, "OnCancel" ) )
+	else if ( !Q_stricmp( pCommand, "Cancel" ) )
 	{
 		if ( m_CancelCommand )
 		{

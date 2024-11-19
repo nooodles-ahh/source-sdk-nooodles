@@ -12,9 +12,7 @@
 #include "vgui_controls/Label.h"
 #include "vgui_controls/ImagePanel.h"
 #include "vgui_controls/Button.h"
-#include "vgui_controls/tgaimagepanel.h"
 #include "tier1/utlbuffer.h"
-#include "tier2/resourceprecacher.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "FileSystem.h"
@@ -31,10 +29,6 @@ using namespace vgui;
 
 #define MAX_LISTED_SAVE_GAMES	128
 
-PRECACHE_REGISTER_BEGIN( GLOBAL, BaseSaveGameDialog )
-PRECACHE( MATERIAL, "vgui/resource/autosave.vmt" )
-PRECACHE_REGISTER_END()
-
 //-----------------------------------------------------------------------------
 // Purpose: Describes the layout of a same game pic
 //-----------------------------------------------------------------------------
@@ -46,7 +40,7 @@ public:
 	{
 		m_iSaveGameListItemID = saveGameListItemID;
 		m_pParent = parent;
-		m_pSaveGameImage = new CTGAImagePanel( this, "SaveGameImage" );
+		m_pSaveGameImage = new ImagePanel( this, "SaveGameImage" );
 		m_pAutoSaveImage = new ImagePanel( this, "AutoSaveImage" );
 		m_pSaveGameScreenshotBackground = new ImagePanel( this, "SaveGameScreenshotBackground" );
 		m_pChapterLabel = new Label( this, "ChapterLabel", "" );
@@ -78,7 +72,7 @@ public:
 		// If a TGA file exists then it is a user created savegame
 		if ( g_pFullFileSystem->FileExists( tga ) )
 		{
-			m_pSaveGameImage->SetTGAFilename( tga );
+			m_pSaveGameImage->SetImage( tga );
 		}
 		// If there is no TGA then it is either an autosave or the user TGA file has been deleted
 		else
@@ -148,7 +142,7 @@ public:
 private:
 	vgui::PanelListPanel *m_pParent;
 	vgui::Label *m_pChapterLabel;
-	CTGAImagePanel *m_pSaveGameImage;
+	ImagePanel *m_pSaveGameImage;
 	ImagePanel *m_pAutoSaveImage;
 	
 	// things to change color when the selection changes

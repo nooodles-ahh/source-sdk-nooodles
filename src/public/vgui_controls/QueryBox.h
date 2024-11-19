@@ -47,15 +47,38 @@ public:
 	// Set a value of the ok command
 	void SetOKCommandValue(const char *keyName, int value);
 
+#ifdef VGUI_ENHANCEMENTS
+	// Sets this query box to be a yes/no/cancel box
+	void SetYesNoCancel(bool state);
+
+	// Set the text on the no button
+	void SetNoButtonText(const char* buttonText);
+	void SetNoButtonText(const wchar_t* wszButtonText);
+
+	// Set the keyvalues to send when the no button is hit
+	void SetNoCommand(KeyValues* keyValues);
+
+	// Set a value of the no command
+	void SetNoCommandValue(const char* keyName, int value);
+
+private:
+	void Init();
+#endif
+
 protected:
 	virtual void OnKeyCodeTyped( KeyCode code );
 	virtual void OnKeyCodePressed( KeyCode code );
 	virtual void OnCommand(const char *command);
-	Button		*m_pCancelButton;
+#ifdef VGUI_ENHANCEMENTS
+	Button		*m_pNoButton;
+#endif
 
 private:
 	KeyValues	*m_pCancelCommand;
 	KeyValues	*m_pOkCommand;
+#ifdef VGUI_ENHANCEMENTS
+	KeyValues	*m_pNoCommand;
+#endif
 };
 
 }

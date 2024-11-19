@@ -35,15 +35,12 @@ using namespace vgui;
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-// TODO - something about a linked list
-#define GAMEUI_COMMAND( command ) 
-
 DECLARE_GAMEUI_DIALOG_FACTORY(OpenOptionsDialog, COptionsDialog)
 
 //-----------------------------------------------------------------------------
 // Purpose: Basic help dialog
 //-----------------------------------------------------------------------------
-COptionsDialog::COptionsDialog(vgui::Panel *parent, vgui::HScheme scheme) : PropertyDialog(parent, "OptionsDialog")
+COptionsDialog::COptionsDialog(vgui::Panel *parent) : PropertyDialog(parent, "OptionsDialog")
 {
 	SetScheme(parent->GetScheme());
 	SetDeleteSelfOnClose( true );

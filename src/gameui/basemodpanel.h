@@ -78,6 +78,7 @@ namespace BaseModUI
 
 		virtual void ApplySchemeSettings(vgui::IScheme *pScheme);
 		virtual void PerformLayout();
+		bool ShouldDarkenPanel(vgui::VPANEL panel);
 		virtual void PaintBackground();
 		virtual void OnSetFocus();
 
@@ -105,6 +106,11 @@ namespace BaseModUI
 		bool m_bNeedsDarkening;
 		bool m_bHasDarkened;
 		CPanelAnimationVar(float, m_flBackgroundFade, "BackgroundFade", "0");
+
+		int m_iMainMenuX;
+		int m_iMainMenuY;
+		int m_iMainMenuBottomMargin;
+		CUtlVector<Vector2D> m_vecMenuTitlePos;
 
 	};
 };

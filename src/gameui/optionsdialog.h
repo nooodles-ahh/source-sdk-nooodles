@@ -22,7 +22,7 @@ class COptionsDialog : public vgui::PropertyDialog
 	DECLARE_CLASS_SIMPLE( COptionsDialog, vgui::PropertyDialog );
 
 public:
-	COptionsDialog(vgui::Panel *parent, vgui::HScheme scheme );
+	COptionsDialog(vgui::Panel *parent);
 	~COptionsDialog();
 
 	void Run();

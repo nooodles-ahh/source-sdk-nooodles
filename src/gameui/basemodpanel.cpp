@@ -39,7 +39,8 @@
 
 #include "loadingdialog.h"
 #include "engineinterface.h"
-#include "quitdialog.h"
+#include "egoquerydialog.h"
+#include "savegamedialog.h"
 
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -98,7 +99,7 @@ public:
 		g_pVGuiSurface->GetScreenSize(screenW, screenH);
 		float aspect = (float)screenW / (float)screenH;
 
-		float targetHeight = 800.f;
+		float targetHeight = 1080.f;
 		float scale = 480.f/targetHeight;
 		if (screenH < targetHeight)
 			scale = 480.f / screenH;
@@ -430,16 +431,18 @@ void CBaseModPanel::ApplySchemeSettings(IScheme *pScheme)
 	m_iBackgroundImageID = surface()->CreateNewTextureID();
 	// depending on the aspect ratio, choose a different startup image
 	if ( ( float )screenWide / ( float )screenTall >= 1.6f )
-		surface()->DrawSetTextureFile( m_iBackgroundImageID, "console/background01_widescreen", true, false);
+		surface()->DrawSetTextureFile( m_iBackgroundImageID, "console/background01_widescreen", false, false);
 	else
-		surface()->DrawSetTextureFile( m_iBackgroundImageID, "console/background01", true, false );
+		surface()->DrawSetTextureFile( m_iBackgroundImageID, "console/background01", false, false );
 
-	if ( m_pGameMenu )
+	IScheme* pClientScheme = vgui::scheme()->GetIScheme(vgui::scheme()->GetScheme("ClientScheme"));
+	if ( pClientScheme )
 	{
-		m_pGameMenu->SetPos(
-			PROPORTIONAL_VALUE( 50 ),
-			PROPORTIONAL_VALUE( 200 )
-		);
+		m_iMainMenuX = atoi(pClientScheme->GetResourceString("Main.Menu.X"));
+		m_iMainMenuX = PROPORTIONAL_VALUE(m_iMainMenuX);
+		m_iMainMenuY = atoi(pClientScheme->GetResourceString("Main.Menu.Y"));
+		m_iMainMenuY = PROPORTIONAL_VALUE(m_iMainMenuY);
+
 		m_pGameMenu->SetVisible( true );
 		m_pGameMenu->SetAlpha( 255 );
 	}
@@ -449,6 +452,11 @@ void CBaseModPanel::ApplySchemeSettings(IScheme *pScheme)
 void CBaseModPanel::PerformLayout()
 {
 	BaseClass::PerformLayout();
+
+	m_pGameMenu->SetPos(
+		m_iMainMenuX,
+		m_iMainMenuY
+	);
 }
 
 void CBaseModPanel::SetMainMenuOverride( vgui::VPANEL panel )
@@ -459,6 +467,23 @@ void CBaseModPanel::SetMainMenuOverride( vgui::VPANEL panel )
 		m_pGameMenu->DeleteAllItems();
 		g_pVGuiPanel->SetParent( panel, GetVPanel() );
 	}
+}
+
+bool CBaseModPanel::ShouldDarkenPanel(vgui::VPANEL panel)
+{
+	int childCount = g_pVGuiPanel->GetChildCount(panel);
+	for (int i = 0; i < childCount; ++i)
+	{
+		VPANEL child = g_pVGuiPanel->GetChild(panel, i);
+		bool bVisible = g_pVGuiPanel->IsVisible(child);
+		bool isPopup = g_pVGuiPanel->IsPopup(child);
+		bool bGamepanel = child == GetVPanel() || child == m_pGameMenu->GetVPanel();
+		if (bVisible && isPopup && !bGamepanel)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void CBaseModPanel::PaintBackground()
@@ -477,23 +502,10 @@ void CBaseModPanel::PaintBackground()
 	surface()->DrawTexturedRect( 0, 0, wide, tall );
 
 	if ( GameUI().IsInLevel() || m_LevelLoading )
-	{
 		return;
-	}
 
-#if 1
-	m_bNeedsDarkening = false;
-	// check if children need darkening
-	for( auto panel : GetChildren() )
-	{
-		bool bVisible = g_pVGuiPanel->IsVisible( panel );
-		bool bGamepanel = panel == m_pGameMenu->GetVPanel();
-		if ( bVisible && !bGamepanel )
-		{
-			m_bNeedsDarkening = true;
-			break;
-		}
-	}
+	// check if we have any popups that need darkening
+	m_bNeedsDarkening = ShouldDarkenPanel(GetVParent()) || ShouldDarkenPanel(GetVPanel());
 
 	// paint dark fade
 	if ( m_bNeedsDarkening && !m_bHasDarkened )
@@ -510,7 +522,6 @@ void CBaseModPanel::PaintBackground()
 
 	surface()->DrawSetColor( 0, 0, 0, m_flBackgroundFade );
 	surface()->DrawFilledRect( 0, 0, wide, tall );
-#endif
 }
 
 void CBaseModPanel::OnCommand(const char *command)
@@ -541,15 +552,22 @@ void CBaseModPanel::OnCommand(const char *command)
 	{
 		if (GameUI().IsInLevel() && engine->GetMaxClients() == 1)
 		{
-			// TODO - save and quit dialog
+			EgoQueryBox* pQuitDialog = new EgoQueryBox("#GameUI_QuitConfirmationTitle", "#GameUI_SaveAndQuitQuery_Info", this);
+			pQuitDialog->SetYesNoCancel(true);
+			pQuitDialog->SetOKButtonText("#GameUI_SaveAndQuit");
+			pQuitDialog->SetNoButtonText("#GameUI_DontSaveAndQuit");
+			pQuitDialog->SetOKCommand(new KeyValues("Command", "command", "SaveAndQuit"));
+			pQuitDialog->SetNoCommand(new KeyValues("Command", "command", "QuitNoConfirm"));
+			pQuitDialog->SetCancelCommand(new KeyValues("Command", "command", "ReleaseModalWindow"));
+			pQuitDialog->AddActionSignalTarget(this);
+			pQuitDialog->DoModal();
 			return;
 		}
-		CQuitDialog* pQuitDialog = new CQuitDialog("#GameUI_QuitConfirmationTitle", "#GameUI_QuitConfirmationText", this);
+		EgoQueryBox* pQuitDialog = new EgoQueryBox("#GameUI_QuitConfirmationTitle", "#GameUI_QuitConfirmationText", this);
 		pQuitDialog->SetOKButtonText("#GameUI_Quit");
-		KeyValues* pKeys = new KeyValues("Command", "command", "QuitNoConfirm");
-		pQuitDialog->SetOKCommand(pKeys);
-		pKeys = new KeyValues("Command", "command", "ReleaseModalWindow");
-		pQuitDialog->SetCancelCommand(pKeys);
+		pQuitDialog->SetOKCommand(new KeyValues("Command", "command", "QuitNoConfirm"));
+		pQuitDialog->SetCancelCommand(new KeyValues("Command", "command", "ReleaseModalWindow"));
+		pQuitDialog->SetNoCommand(new KeyValues("Command", "command", "ReleaseModalWindow"));
 		pQuitDialog->AddActionSignalTarget(this);
 		pQuitDialog->DoModal();
 	}
@@ -558,6 +576,20 @@ void CBaseModPanel::OnCommand(const char *command)
 		SetVisible(false);
 		vgui::surface()->RestrictPaintToSinglePanel( GetVPanel() );
 		engine->ClientCmd_Unrestricted( "quit\n" );
+	}
+	else if (!V_stricmp(command, "SaveAndQuit"))
+	{
+		char saveName[128];
+		CSaveGameDialog::FindSaveSlot(saveName, sizeof(saveName));
+		if (saveName && saveName[0])
+		{
+			// Load the game, return to top and switch to engine
+			char sz[256];
+			Q_snprintf(sz, sizeof(sz), "save %s\n", saveName);
+
+			engine->ClientCmd_Unrestricted(sz);
+		}
+		PostMessage(this, new KeyValues("Command", "command", "QuitNoConfirm"));
 	}
 	else if (!V_stricmp(command, "OpenServerBrowser"))
 	{

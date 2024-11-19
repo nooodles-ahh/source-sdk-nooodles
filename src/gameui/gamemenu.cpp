@@ -107,6 +107,10 @@ void CGameMenu::UpdateVisibleItems(bool inLevel, bool isMultiplayer, bool isInRe
         {
             bIsVisible = false;
         }
+        else if (userData->GetBool("ConsoleOnly"))
+        {
+            bIsVisible = false;
+        }
 
         item->SetVisible(bIsVisible);
         item->SetPaintBackgroundEnabled(false);

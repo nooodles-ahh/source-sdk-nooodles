@@ -27,32 +27,30 @@ using namespace vgui;
 //-----------------------------------------------------------------------------
 QueryBox::QueryBox(const char *title, const char *queryText, vgui::Panel *parent) : MessageBox(title, queryText,parent)
 {
-	SetDeleteSelfOnClose(true);
-	m_pCancelButton = new Button(this, "CancelButton", "#QueryBox_Cancel");
-	m_pCancelButton->SetCommand("Cancel"); 
-	m_pOkButton->SetCommand("OK");
-	m_pCancelCommand = NULL;
-	m_pOkCommand = NULL;
-
-	m_pOkButton->SetTabPosition(1);
-	m_pCancelButton->SetTabPosition(2);
+	Init();
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Constructor
-//-----------------------------------------------------------------------------
 QueryBox::QueryBox(const wchar_t *wszTitle, const wchar_t *wszQueryText,vgui::Panel *parent) : MessageBox(wszTitle, wszQueryText,parent)
 {
+	Init();
+}
+
+#ifdef VGUI_ENHANCEMENTS
+void QueryBox::Init()
+{
 	SetDeleteSelfOnClose(true);
-	m_pCancelButton = new Button(this, "CancelButton", "#QueryBox_Cancel");
-	m_pCancelButton->SetCommand("Cancel"); 
-	m_pOkButton->SetCommand("OK");
-	m_pCancelCommand = NULL;
-	m_pOkCommand = NULL;
+	m_pCancelButton->SetText("#QueryBox_Cancel");
+	m_pNoButton = nullptr;
+
+	m_pCancelCommand = nullptr;
+	m_pOkCommand = nullptr;
+	m_pNoCommand = nullptr;
 
 	m_pOkButton->SetTabPosition(1);
 	m_pCancelButton->SetTabPosition(2);
+	SetCancelButtonVisible(true);
 }
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Destructor
@@ -69,6 +67,16 @@ QueryBox::~QueryBox()
 	{
 		m_pCancelCommand->deleteThis();
 	}
+#ifdef VGUI_ENHANCEMENTS
+	if (m_pNoCommand)
+	{
+		m_pNoCommand->deleteThis();
+	}
+	if (m_pNoButton)
+	{
+		delete m_pNoButton;
+	}
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -78,6 +86,7 @@ void QueryBox::PerformLayout()
 {
 	BaseClass::PerformLayout();
 
+#if 1
 	int boxWidth, boxTall;
 	GetSize(boxWidth, boxTall);
 
@@ -101,16 +110,42 @@ void QueryBox::PerformLayout()
 	btnWide = max( oldWide, btnWide + padding );
 	btnTall = max( oldTall, btnTall + padding );
 	m_pOkButton->SetSize( btnWide, btnTall );
+
+
+	if (m_pNoButton)
+	{
+		m_pNoButton->GetContentSize(btnWide, btnTall);
+		btnWide = max(oldWide, btnWide + padding);
+		btnTall = max(oldTall, btnTall + padding);
+		m_pNoButton->SetSize(btnWide, btnTall);
+	}
+
 #endif
 
-//nt boxWidth, boxTall;
 	GetSize(boxWidth, boxTall);
-//	wide = max(wide, btnWide * 2 + 100);
-//	SetSize(wide, tall);
 
 	padding = PROPORTIONAL_VALUE( 15 );
-	m_pOkButton->SetPos((wide/2)-(m_pOkButton->GetWide())-1 + x, tall - m_pOkButton->GetTall() - padding );
-	m_pCancelButton->SetPos((wide/2) + x+ PROPORTIONAL_VALUE( 16 ), tall - m_pCancelButton->GetTall() - padding );
+
+	if (m_pNoButton)
+	{
+		int totalButtonWidth = m_pOkButton->GetWide() + m_pNoButton->GetWide() + m_pCancelButton->GetWide() + padding * 2;
+
+		float start = (boxWidth - totalButtonWidth )/ 2.f;
+
+		// distribute the buttons evenly
+		m_pOkButton->SetPos(start, tall - m_pOkButton->GetTall() - padding);
+		m_pNoButton->SetPos(m_pOkButton->GetXPos() + m_pOkButton->GetWide() + padding, tall - m_pNoButton->GetTall() - padding);
+		m_pCancelButton->SetPos(m_pNoButton->GetXPos() + m_pNoButton->GetWide() + padding, tall - m_pCancelButton->GetTall() - padding);
+
+	}
+	else
+	{
+		m_pOkButton->SetPos((wide / 2) - (m_pOkButton->GetWide()) - 1 + x, tall - m_pOkButton->GetTall() - padding);
+		m_pCancelButton->SetPos((wide / 2) + x + PROPORTIONAL_VALUE(16), tall - m_pCancelButton->GetTall() - padding);
+	}
+
+
+#endif
 
 }
 
@@ -127,6 +162,15 @@ void QueryBox::OnCommand(const char *command)
 		if ( m_pOkCommand )
 		{
 			PostActionSignal(m_pOkCommand->MakeCopy());
+		}
+	}
+	else if (!stricmp(command, "No"))
+	{
+		OnCommand("Close");
+
+		if (m_pNoCommand)
+		{
+			PostActionSignal(m_pNoCommand->MakeCopy());
 		}
 	}
 	else if (!stricmp(command, "Cancel"))
@@ -168,6 +212,71 @@ void QueryBox::SetOKCommandValue(const char *keyName, int value)
 
 	m_pOkCommand->SetInt(keyName, value);
 }
+
+#ifdef VGUI_ENHANCEMENTS
+void QueryBox::SetYesNoCancel(bool state)
+{
+	if (state)
+	{
+		if (!m_pNoButton)
+		{
+			m_pNoButton = new Button(this, NULL, "#QueryBox_No");
+			m_pNoButton->SetCommand("No");
+			m_pNoButton->AddActionSignalTarget(this);
+			m_pNoButton->SetTabPosition(3);
+		}
+	}
+	else
+	{
+		if (m_pNoButton)
+		{
+			delete m_pNoButton;
+			m_pNoButton = nullptr;
+		}
+	}
+}
+
+void QueryBox::SetNoButtonText(const char* buttonText)
+{
+	if (!m_pNoButton)
+		return;
+	m_pNoButton->SetText(buttonText);
+	InvalidateLayout();
+}
+
+void QueryBox::SetNoButtonText(const wchar_t* wszButtonText)
+{
+	if (!m_pNoButton)
+		return;
+	m_pNoButton->SetText(wszButtonText);
+	InvalidateLayout();
+}
+
+void QueryBox::SetNoCommand(KeyValues* keyValues)
+{
+	if (!m_pNoButton)
+		return;
+
+	if (m_pNoCommand)
+	{
+		m_pNoCommand->deleteThis();
+	}
+	m_pNoCommand = keyValues;
+}
+
+void QueryBox::SetNoCommandValue(const char* keyName, int value)
+{
+	if (!m_pNoButton)
+		return;
+
+	if (!m_pNoCommand)
+	{
+		m_pNoCommand = new KeyValues("Command");
+	}
+
+	m_pNoCommand->SetInt(keyName, value);
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Set the keyvalues to send when the cancel button is hit
